@@ -1,0 +1,102 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import WalineComments from '../components/WalineComments.astro';
+import { SITE_TITLE, WALINE_SERVER_URL } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`留言板 - ${SITE_TITLE}`} description="欢迎在这里留下你的建议与想法。" />
+		<style>
+			main {
+				width: var(--max-width);
+				max-width: calc(100% - 2.5rem);
+				margin: 0 auto;
+				padding: 2.5rem 0 3rem;
+			}
+
+			.page-header {
+				margin-bottom: 1.75rem;
+			}
+			.page-header h1 {
+				margin-bottom: 0.4rem;
+				font-size: clamp(1.8rem, 3vw, 2.2rem);
+				font-weight: 800;
+				background: linear-gradient(135deg, #667eea, #764ba2);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+			.page-meta {
+				color: var(--color-muted);
+				margin: 0;
+				line-height: 1.7;
+				font-size: 0.98rem;
+			}
+
+			.comments {
+				border-radius: var(--radius-card);
+				border: 1px solid var(--color-border);
+				background: radial-gradient(circle at top left, rgba(102, 126, 234, 0.08), transparent 55%),
+					radial-gradient(circle at bottom right, rgba(118, 75, 162, 0.08), transparent 55%),
+					var(--color-surface);
+				box-shadow: var(--shadow-soft);
+				padding: 1.75rem 1.75rem 1.5rem;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.comments::before {
+				content: '💬 留言区';
+				position: absolute;
+				top: 1.1rem;
+				right: 1.5rem;
+				font-size: 0.8rem;
+				color: var(--color-muted);
+				opacity: 0.8;
+			}
+
+			@media (max-width: 720px) {
+				main {
+					max-width: calc(100% - 1.5rem);
+				}
+				.comments {
+					padding: 1.25rem 1rem 1.1rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="page-header">
+				<h1>留言板</h1>
+				<p class="page-meta">
+					欢迎大家在此留下你的建议和想法；也可以去
+					<a href="https://github.com/YiXuanHQ/Blog-Template-Astro/issues" target="_blank" rel="noopener noreferrer">
+						GitHub Issue
+					</a>
+					或
+					<a href="https://github.com/YiXuanHQ/Blog-Template-Astro/discussions" target="_blank" rel="noopener noreferrer">
+						GitHub Discussions
+					</a>
+					交流。
+				</p>
+			</section>
+
+			<div class="comments">
+				<WalineComments
+					serverURL={WALINE_SERVER_URL}
+					path="/guestbook/"
+					placeholder="请输入留言，填写邮箱可收到回复哦！..."
+				/>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+

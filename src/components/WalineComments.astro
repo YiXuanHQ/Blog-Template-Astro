@@ -1,0 +1,63 @@
+---
+interface Props {
+	serverURL: string;
+	path?: string;
+	placeholder?: string;
+	dark?: string;
+	pageview?: boolean;
+}
+
+const { serverURL, path, placeholder, dark, pageview = true } = Astro.props;
+
+if (!serverURL) {
+	throw new Error('WalineComments: serverURL is required');
+}
+
+const walinePath = path ?? Astro.url.pathname;
+const walinePlaceholder = placeholder ?? '请输入留言，填写邮箱可收到回复哦！...';
+// 如果未指定 dark，默认使用站点主题选择器，Waline 会自动检测并跟随主题切换
+const walineDark = dark ?? 'html[data-theme="dark"]';
+---
+
+<!-- 使用官方 CDN，避免本地打包产物在部署环境下路径/缓存导致的加载异常 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@v3/dist/waline.css" />
+
+<div
+	data-waline-root
+	data-server-url={serverURL}
+	data-path={walinePath}
+	data-placeholder={walinePlaceholder}
+	data-dark={walineDark}
+	data-pageview={pageview ? 'true' : 'false'}
+></div>
+
+<script is:inline type="module">
+	import { init } from 'https://cdn.jsdelivr.net/npm/@waline/client@v3/dist/waline.js';
+
+	function initWalineFromEl(el) {
+		const serverURL = el.dataset.serverUrl;
+		if (!serverURL) return;
+
+		const path = el.dataset.path || window.location.pathname;
+		const placeholder = el.dataset.placeholder || '请输入留言，填写邮箱可收到回复哦！...';
+		const dark = el.dataset.dark || 'auto';
+		const pageview = el.dataset.pageview === 'true';
+
+		init({
+			el,
+			serverURL,
+			path,
+			dark,
+			pageview,
+			// 仅登录用户才能发表评论
+			login: 'force',
+			locale: { placeholder },
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		document.querySelectorAll('[data-waline-root]').forEach((el) => initWalineFromEl(el));
+	});
+</script>
+
+

@@ -1,0 +1,506 @@
+---
+// TableOfContents 组件 - 自动生成文章目录
+---
+
+<div id="toc-container" class="toc-container">
+	<div class="toc-header">
+		<div class="toc-header-content">
+			<svg class="toc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="8" y1="6" x2="21" y2="6"></line>
+				<line x1="8" y1="12" x2="21" y2="12"></line>
+				<line x1="8" y1="18" x2="21" y2="18"></line>
+				<line x1="3" y1="6" x2="3.01" y2="6"></line>
+				<line x1="3" y1="12" x2="3.01" y2="12"></line>
+				<line x1="3" y1="18" x2="3.01" y2="18"></line>
+			</svg>
+			<h3 class="toc-title">目录</h3>
+		</div>
+		<div class="toc-progress-bar">
+			<div class="toc-progress-fill"></div>
+		</div>
+	</div>
+	<nav id="toc-nav" class="toc-nav" aria-label="文章目录">
+		<ul id="toc-list" class="toc-list"></ul>
+	</nav>
+</div>
+
+<script>
+	interface TocItem {
+		id: string;
+		text: string;
+		level: number;
+		element: HTMLElement;
+	}
+
+	function generateId(text: string): string {
+		// 将中文和特殊字符转换为 URL 友好的 ID
+		return text
+			.toLowerCase()
+			.replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+			.replace(/^-+|-+$/g, '');
+	}
+
+	function initTableOfContents() {
+		const tocContainer = document.getElementById('toc-container');
+		const tocList = document.getElementById('toc-list');
+		
+		if (!tocContainer || !tocList) return;
+
+		// 查找所有标题（h2-h4）
+		const headings = Array.from(
+			document.querySelectorAll('.prose h2, .prose h3, .prose h4')
+		) as HTMLElement[];
+
+		if (headings.length === 0) {
+			// 如果没有标题，隐藏目录
+			tocContainer.style.display = 'none';
+			const sidebar = tocContainer.closest('.toc-sidebar');
+			if (sidebar) {
+				(sidebar as HTMLElement).style.display = 'none';
+			}
+			return;
+		}
+
+		const tocItems: TocItem[] = [];
+
+		// 为每个标题生成 ID 并创建目录项
+		headings.forEach((heading) => {
+			const level = parseInt(heading.tagName.charAt(1));
+			const text = heading.textContent || '';
+			let id = heading.id;
+
+			// 如果标题没有 ID，生成一个
+			if (!id) {
+				id = generateId(text);
+				heading.id = id;
+			}
+
+			// 创建锚点链接（如果还没有）
+			if (!heading.querySelector('.heading-anchor')) {
+				const anchor = document.createElement('a');
+				anchor.href = `#${id}`;
+				anchor.className = 'heading-anchor';
+				anchor.setAttribute('aria-hidden', 'true');
+				anchor.innerHTML = '#';
+				heading.appendChild(anchor);
+			}
+
+			tocItems.push({
+				id,
+				text,
+				level,
+				element: heading,
+			});
+		});
+
+		// 生成目录 HTML
+		let currentLevel = 0;
+		let currentUl = tocList;
+
+		tocItems.forEach((item) => {
+			// 如果层级增加，创建新的嵌套 ul
+			if (item.level > currentLevel) {
+				const newUl = document.createElement('ul');
+				newUl.className = 'toc-nested';
+				currentUl.appendChild(newUl);
+				currentUl = newUl;
+			}
+			// 如果层级减少，回到对应的父级 ul
+			else if (item.level < currentLevel) {
+				const diff = currentLevel - item.level;
+				for (let i = 0; i < diff; i++) {
+					const parent = currentUl.parentElement;
+					if (parent && parent.tagName === 'UL') {
+						currentUl = parent;
+					}
+				}
+			}
+
+			// 创建目录项
+			const li = document.createElement('li');
+			li.className = `toc-item toc-level-${item.level}`;
+			
+			const a = document.createElement('a');
+			a.href = `#${item.id}`;
+			a.textContent = item.text;
+			a.className = 'toc-link';
+			
+			// 平滑滚动
+			a.addEventListener('click', (e) => {
+				e.preventDefault();
+				const target = document.getElementById(item.id);
+				if (target) {
+					const offset = 80; // 考虑固定头部的高度
+					const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+					window.scrollTo({
+						top: targetPosition,
+						behavior: 'smooth',
+					});
+					// 更新 URL（不触发页面跳转）
+					history.pushState(null, '', `#${item.id}`);
+				}
+			});
+
+			li.appendChild(a);
+			currentUl.appendChild(li);
+			currentLevel = item.level;
+		});
+
+		// 高亮当前章节
+		function highlightCurrentSection() {
+			const scrollPosition = window.scrollY + 100; // 偏移量
+			let currentId = '';
+
+			// 从下往上查找当前应该高亮的标题
+			for (let i = tocItems.length - 1; i >= 0; i--) {
+				const item = tocItems[i];
+				const element = item.element;
+				if (element.offsetTop <= scrollPosition) {
+					currentId = item.id;
+					break;
+				}
+			}
+
+			// 更新高亮状态
+			document.querySelectorAll('.toc-link').forEach((link) => {
+				link.classList.remove('active');
+			});
+
+			if (currentId) {
+				const activeLink = document.querySelector(`.toc-link[href="#${currentId}"]`);
+				if (activeLink) {
+					activeLink.classList.add('active');
+				}
+			}
+		}
+
+		// 更新阅读进度条
+		function updateProgressBar() {
+			const progressFill = document.querySelector('.toc-progress-fill') as HTMLElement;
+			if (!progressFill) return;
+
+			const windowHeight = window.innerHeight;
+			const documentHeight = document.documentElement.scrollHeight;
+			const scrollTop = window.scrollY;
+			const scrollableHeight = documentHeight - windowHeight;
+			const progress = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0;
+			
+			progressFill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+		}
+
+		// 监听滚动事件
+		window.addEventListener('scroll', () => {
+			highlightCurrentSection();
+			updateProgressBar();
+		});
+		
+		highlightCurrentSection(); // 初始高亮
+		updateProgressBar(); // 初始进度
+
+		// 处理 URL 中的锚点
+		if (window.location.hash) {
+			const hash = window.location.hash.substring(1);
+			const target = document.getElementById(hash);
+			if (target) {
+				setTimeout(() => {
+					const offset = 80;
+					const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+					window.scrollTo({
+						top: targetPosition,
+						behavior: 'smooth',
+					});
+				}, 100);
+			}
+		}
+	}
+
+	// 页面加载完成后初始化
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initTableOfContents);
+	} else {
+		initTableOfContents();
+	}
+</script>
+
+<style>
+	.toc-container {
+		position: sticky;
+		top: 100px;
+		background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-subtle) 100%);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-card);
+		padding: 0;
+		box-shadow: var(--shadow-soft);
+		max-height: calc(100vh - 120px);
+		overflow: hidden;
+		margin-bottom: 2rem;
+		backdrop-filter: blur(10px);
+		transition: box-shadow 0.3s ease, transform 0.3s ease;
+	}
+
+	.toc-container:hover {
+		box-shadow: 0 12px 36px rgba(93, 103, 232, 0.18);
+		transform: translateY(-2px);
+	}
+
+	.toc-header {
+		padding: 1.25rem 1.25rem 1rem;
+		border-bottom: 1px solid var(--color-border);
+		background: rgba(93, 103, 232, 0.03);
+	}
+
+	.toc-header-content {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.toc-icon {
+		color: var(--color-primary);
+		flex-shrink: 0;
+		opacity: 0.9;
+	}
+
+	.toc-title {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--color-text);
+		letter-spacing: -0.01em;
+	}
+
+	.toc-progress-bar {
+		height: 3px;
+		background: var(--color-border);
+		border-radius: 2px;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.toc-progress-fill {
+		height: 100%;
+		background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+		border-radius: 2px;
+		width: 0%;
+		transition: width 0.1s ease-out;
+		box-shadow: 0 0 8px rgba(93, 103, 232, 0.4);
+	}
+
+	.toc-nav {
+		font-size: 0.875rem;
+		padding: 0.75rem 1rem 1rem;
+		max-height: calc(100vh - 240px);
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+
+	.toc-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.toc-nested {
+		list-style: none;
+		padding-left: 1.25rem;
+		margin-top: 0.25rem;
+		margin-left: 0.5rem;
+		border-left: 2px solid var(--color-border);
+		position: relative;
+	}
+
+	.toc-nested::before {
+		content: '';
+		position: absolute;
+		left: -2px;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: linear-gradient(180deg, 
+			transparent 0%, 
+			var(--color-primary) 20%, 
+			var(--color-primary) 80%, 
+			transparent 100%);
+		opacity: 0.3;
+	}
+
+	.toc-item {
+		margin: 0.35rem 0;
+		position: relative;
+	}
+
+	.toc-link {
+		display: flex;
+		align-items: flex-start;
+		color: var(--color-muted);
+		text-decoration: none;
+		padding: 0.5rem 0.75rem;
+		border-radius: 8px;
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		line-height: 1.6;
+		word-break: break-word;
+		position: relative;
+		border-left: 3px solid transparent;
+	}
+
+	.toc-link::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--color-primary);
+		opacity: 0;
+		transition: opacity 0.25s ease;
+		border-radius: 0 2px 2px 0;
+	}
+
+	.toc-link:hover {
+		color: var(--color-primary);
+		background: rgba(93, 103, 232, 0.1);
+		transform: translateX(4px);
+		padding-left: 0.875rem;
+	}
+
+	.toc-link:hover::before {
+		opacity: 1;
+	}
+
+	.toc-link.active {
+		color: var(--color-primary);
+		background: linear-gradient(90deg, rgba(93, 103, 232, 0.15), rgba(93, 103, 232, 0.08));
+		font-weight: 600;
+		border-left-color: var(--color-primary);
+		padding-left: 0.875rem;
+		box-shadow: 0 2px 8px rgba(93, 103, 232, 0.15);
+	}
+
+	.toc-link.active::before {
+		opacity: 1;
+	}
+
+	.toc-level-2 .toc-link {
+		font-weight: 600;
+		font-size: 0.9375rem;
+		color: var(--color-text);
+	}
+
+	.toc-level-3 .toc-link {
+		font-size: 0.875rem;
+		font-weight: 500;
+		padding-left: 1rem;
+	}
+
+	.toc-level-3 .toc-link:hover,
+	.toc-level-3 .toc-link.active {
+		padding-left: 1.125rem;
+	}
+
+	.toc-level-4 .toc-link {
+		font-size: 0.8125rem;
+		font-weight: 400;
+		padding-left: 1.25rem;
+		color: var(--color-muted);
+	}
+
+	.toc-level-4 .toc-link:hover,
+	.toc-level-4 .toc-link.active {
+		padding-left: 1.375rem;
+	}
+
+	/* 滚动条样式 */
+	.toc-nav::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.toc-nav::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.toc-nav::-webkit-scrollbar-thumb {
+		background: var(--color-border);
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+
+	.toc-nav::-webkit-scrollbar-thumb:hover {
+		background: var(--color-primary);
+		opacity: 0.6;
+	}
+
+	/* 深色模式适配 */
+	:root[data-theme='dark'] .toc-container {
+		background: linear-gradient(135deg, var(--color-surface) 0%, rgba(5, 8, 22, 0.8) 100%);
+	}
+
+	:root[data-theme='dark'] .toc-header {
+		background: rgba(93, 103, 232, 0.08);
+	}
+
+	:root[data-theme='dark'] .toc-link.active {
+		background: linear-gradient(90deg, rgba(93, 103, 232, 0.25), rgba(93, 103, 232, 0.12));
+		box-shadow: 0 2px 8px rgba(93, 103, 232, 0.25);
+	}
+
+	/* 响应式设计 */
+	@media (max-width: 1024px) {
+		.toc-container {
+			position: relative;
+			top: 0;
+			max-height: none;
+			margin-bottom: 2rem;
+		}
+
+		.toc-nav {
+			max-height: none;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.toc-container {
+			padding: 0;
+			border-radius: 12px;
+		}
+
+		.toc-header {
+			padding: 1rem 1rem 0.875rem;
+		}
+
+		.toc-header-content {
+			margin-bottom: 0.625rem;
+		}
+
+		.toc-icon {
+			width: 18px;
+			height: 18px;
+		}
+
+		.toc-title {
+			font-size: 0.9375rem;
+		}
+
+		.toc-nav {
+			padding: 0.625rem 0.875rem 0.875rem;
+		}
+
+		.toc-link {
+			font-size: 0.875rem;
+			padding: 0.4rem 0.625rem;
+		}
+
+		.toc-level-2 .toc-link {
+			font-size: 0.875rem;
+		}
+
+		.toc-level-3 .toc-link {
+			font-size: 0.8125rem;
+		}
+
+		.toc-level-4 .toc-link {
+			font-size: 0.75rem;
+		}
+	}
+</style>
+

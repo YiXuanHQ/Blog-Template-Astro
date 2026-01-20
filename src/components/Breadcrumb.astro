@@ -1,0 +1,101 @@
+---
+interface BreadcrumbItem {
+	label: string;
+	href?: string;
+}
+
+const { items = [] } = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="面包屑导航">
+	<ol class="breadcrumb-list">
+		{items.map((item, index) => (
+			<li class="breadcrumb-item">
+				{index > 0 && <span class="breadcrumb-separator">></span>}
+				{item.href ? (
+					<a href={item.href} class="breadcrumb-link">
+						{item.label}
+					</a>
+				) : (
+					<span class="breadcrumb-current">{item.label}</span>
+				)}
+			</li>
+		))}
+	</ol>
+</nav>
+
+<style>
+	.breadcrumb {
+		margin-bottom: 1.5rem;
+	}
+
+	.breadcrumb-list {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.breadcrumb-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.breadcrumb-separator {
+		color: var(--color-muted);
+		font-size: 0.875rem;
+		margin: 0 0.25rem;
+		user-select: none;
+	}
+
+	.breadcrumb-link {
+		color: var(--color-primary);
+		text-decoration: none;
+		font-size: 0.875rem;
+		font-weight: 500;
+		transition: color 0.2s ease;
+		display: flex;
+		align-items: center;
+	}
+
+	.breadcrumb-link:hover {
+		color: var(--color-primary-dark);
+		text-decoration: underline;
+	}
+
+	.breadcrumb-current {
+		color: var(--color-muted);
+		font-size: 0.875rem;
+		font-weight: 400;
+	}
+
+	:root[data-theme='dark'] .breadcrumb-link {
+		color: rgba(148, 163, 233, 0.9);
+	}
+
+	:root[data-theme='dark'] .breadcrumb-link:hover {
+		color: rgba(148, 163, 233, 1);
+	}
+
+	:root[data-theme='dark'] .breadcrumb-current {
+		color: rgba(148, 163, 233, 0.6);
+	}
+
+	@media (max-width: 768px) {
+		.breadcrumb {
+			margin-bottom: 1rem;
+		}
+
+		.breadcrumb-link,
+		.breadcrumb-current {
+			font-size: 0.8125rem;
+		}
+	}
+</style>
+
+
+

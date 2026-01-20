@@ -1,0 +1,243 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('diary'))
+	.filter((post) => !post.data.draft)
+	.sort((a, b) => {
+		const dateA = a.data.pubDate || a.data.date || new Date(0);
+		const dateB = b.data.pubDate || b.data.date || new Date(0);
+		return dateB.valueOf() - dateA.valueOf();
+	})
+	.slice(0, 10);
+
+const tags = Array.from(new Set(posts.flatMap((post) => post.data.tags || [])));
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`日常随笔 - ${SITE_TITLE}`} description="记录生活点滴，分享思考感悟。" />
+		<style>
+			main {
+				width: var(--max-width);
+				max-width: calc(100% - 2.5rem);
+			}
+			.page-layout {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 2rem;
+				align-items: start;
+			}
+			.page-header {
+				margin-bottom: 2rem;
+			}
+			.page-header h1 {
+				margin-bottom: 0.8rem;
+				font-size: clamp(1.8rem, 3vw, 2.2rem);
+			}
+			.page-meta {
+				display: flex;
+				align-items: center;
+				gap: 1.2rem;
+				margin-bottom: 1rem;
+				font-size: 0.9rem;
+				color: var(--color-muted);
+			}
+			.meta-item {
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+			}
+			.meta-icon {
+				font-size: 1rem;
+			}
+			.page-subtitle {
+				color: var(--color-muted);
+				font-size: 1rem;
+				margin-bottom: 1.5rem;
+			}
+			.intro-box {
+				background: linear-gradient(135deg, #5d67e8, #9f6bff);
+				border-radius: var(--radius-card);
+				padding: 1.8rem 2rem;
+				margin-bottom: 2.5rem;
+				color: white;
+				box-shadow: 0 8px 24px rgba(93, 103, 232, 0.3);
+			}
+			.intro-box p {
+				margin: 0;
+				color: white;
+				line-height: 1.7;
+				font-size: 1rem;
+			}
+			.section-title {
+				display: flex;
+				align-items: center;
+				gap: 0.6rem;
+				font-size: 1.3rem;
+				font-weight: 600;
+				margin-bottom: 1.5rem;
+				color: var(--color-text);
+			}
+			.section-icon {
+				font-size: 1.2rem;
+			}
+			.notes-list {
+				display: flex;
+				flex-direction: column;
+				gap: 1.2rem;
+			}
+			.note-card {
+				background: var(--color-surface);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-card);
+				padding: 1.5rem;
+				transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+			}
+			.note-card:hover {
+				transform: translateY(-2px);
+				box-shadow: var(--shadow-soft);
+				border-color: rgba(93, 103, 232, 0.25);
+			}
+			.note-date {
+				color: var(--color-muted);
+				font-size: 0.85rem;
+				margin-bottom: 0.6rem;
+			}
+			.note-title {
+				margin: 0 0 0.8rem 0;
+				font-size: 1.2rem;
+				line-height: 1.4;
+			}
+			.note-title a {
+				color: var(--color-text);
+				text-decoration: none;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+			.note-title a:hover {
+				color: var(--color-primary);
+			}
+			.note-title-icon {
+				font-size: 1rem;
+			}
+			.note-summary {
+				color: var(--color-muted);
+				line-height: 1.7;
+				margin: 0 0 0.8rem 0;
+			}
+			.note-author {
+				text-align: right;
+				color: var(--color-muted);
+				font-size: 0.9rem;
+				margin-top: 0.8rem;
+				padding-top: 0.8rem;
+				border-top: 1px dashed var(--color-border);
+			}
+			.sidebar {
+				position: sticky;
+				top: 80px;
+			}
+			.sidebar-title {
+				font-size: 1.1rem;
+				font-weight: 600;
+				margin-bottom: 1rem;
+				color: var(--color-text);
+			}
+			.sidebar-menu {
+				background: var(--color-surface);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-card);
+				padding: 1.2rem;
+			}
+			.sidebar-item {
+				display: flex;
+				align-items: center;
+				gap: 0.6rem;
+				padding: 0.7rem 0;
+				color: var(--color-text);
+				text-decoration: none;
+				border-bottom: 1px solid var(--color-border);
+				transition: color 0.2s ease;
+			}
+			.sidebar-item:last-child {
+				border-bottom: none;
+			}
+			.sidebar-item:hover {
+				color: var(--color-primary);
+			}
+			.sidebar-item-icon {
+				font-size: 1rem;
+			}
+			@media (max-width: 768px) {
+				main {
+					max-width: calc(100% - 1.5rem);
+				}
+				.intro-box {
+					padding: 1.4rem 1.6rem;
+				}
+				.note-card {
+					padding: 1.2rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="page-layout">
+				<div class="main-content">
+					<section class="page-header">
+						<h1>日常随笔</h1>
+						<p class="page-subtitle">记录生活点滴，分享思考感悟。</p>
+					</section>
+
+					<div class="intro-box">
+						<p>
+							这里是我的个人空间，记录技术之外的思考、生活感悟和随想。欢迎来到我的精神角落 ☕
+						</p>
+					</div>
+
+					<section>
+						<h2 class="section-title">
+							<span class="section-icon">📅</span>
+							<span>最近更新</span>
+						</h2>
+						<div class="notes-list">
+							{
+								posts.map((post) => (
+									<article class="note-card">
+										<div class="note-date">
+											<FormattedDate date={post.data.pubDate || post.data.date || new Date()} />
+										</div>
+										<h3 class="note-title">
+											<a href={`/notes/${post.id}/`}>
+												<span class="note-title-icon">✨</span>
+												<span>{post.data.title}</span>
+											</a>
+										</h3>
+										<p class="note-summary">{post.data.description}</p>
+										<div class="note-author">—— 你的名字</div>
+									</article>
+								))
+							}
+						</div>
+					</section>
+				</div>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+
+
+
+
+

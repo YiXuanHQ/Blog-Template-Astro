@@ -1,0 +1,460 @@
+---
+import { algolia, SITE_TITLE } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+import HomeIcon from './icons/HomeIcon.astro';
+import BookIcon from './icons/BookIcon.astro';
+import ArticleIcon from './icons/ArticleIcon.astro';
+import LinkIcon from './icons/LinkIcon.astro';
+import NoteIcon from './icons/NoteIcon.astro';
+import MessageIcon from './icons/MessageIcon.astro';
+import UserIcon from './icons/UserIcon.astro';
+---
+
+<header>
+	<nav>
+		<div class="brand">
+			<a href="/" class="brand-link">
+				<img src="/avatar.png" alt="你的名字" class="avatar" />
+				<span class="brand-title">{SITE_TITLE}</span>
+			</a>
+		</div>
+
+		<div class="search">
+			<div id="docsearch"></div>
+		</div>
+
+		<div class="links">
+			<HeaderLink href="/" icon={HomeIcon}>首页</HeaderLink>
+			<HeaderLink href="/tutorials/" icon={BookIcon}>教程中心</HeaderLink>
+			<HeaderLink href="/articles/" icon={ArticleIcon}>技术文章</HeaderLink>
+			<HeaderLink href="/links/" icon={LinkIcon}>友情链接</HeaderLink>
+			<HeaderLink href="/notes/" icon={NoteIcon}>日常随笔</HeaderLink>
+			<HeaderLink href="/guestbook/" icon={MessageIcon}>留言板</HeaderLink>
+			<HeaderLink href="/about/" icon={UserIcon}>关于</HeaderLink>
+		</div>
+
+		<div class="actions">
+			<button class="icon-button" type="button" data-toggle-lang aria-label="切换语言">
+				<span class="lang-label">简</span>
+			</button>
+			<button class="icon-button" type="button" data-toggle-theme aria-label="切换主题">
+				<span class="theme-icon theme-icon-sun">☀</span>
+			</button>
+		</div>
+	</nav>
+</header>
+<style>
+	header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		backdrop-filter: blur(14px);
+		border-bottom: 1px solid var(--color-border);
+		background: rgba(255, 255, 255, 0.82);
+		transition: background-color 0.3s ease, border-color 0.3s ease;
+	}
+	
+	:root[data-theme='dark'] header {
+		background: rgba(5, 8, 22, 0.82);
+	}
+	nav {
+		width: 100%;
+		max-width: 1280px;
+		margin: 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		padding: 0.4rem 0.8rem;
+	}
+	.brand {
+		display: flex;
+		align-items: center;
+		flex: 0 0 auto;
+	}
+	.brand-link {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
+		color: inherit;
+		white-space: nowrap;
+	}
+	.avatar {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 2px solid rgba(93, 103, 232, 0.2);
+		box-shadow: 0 2px 8px rgba(93, 103, 232, 0.15);
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		flex-shrink: 0;
+	}
+	.brand-link:hover .avatar {
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px rgba(93, 103, 232, 0.25);
+	}
+	.brand-title {
+		color: var(--color-text);
+		font-weight: 800;
+		font-size: 1rem;
+		white-space: nowrap;
+	}
+	.search {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 170px;
+		flex: 0 0 auto;
+		margin-right: 0.8rem;
+	}
+	.search-input {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.4rem 0.8rem;
+		border-radius: 999px;
+		border: 1px solid rgba(93, 103, 232, 0.22);
+		background: rgba(93, 103, 232, 0.03);
+		color: var(--color-muted);
+		font-size: 0.85rem;
+		cursor: pointer;
+		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+	}
+	
+	:root[data-theme='dark'] .search-input {
+		background: rgba(93, 103, 232, 0.1);
+		border-color: rgba(93, 103, 232, 0.3);
+	}
+	.search-icon {
+		font-size: 0.9rem;
+	}
+	.search-placeholder {
+		white-space: nowrap;
+	}
+	.search-shortcut {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.15rem;
+		margin-left: 0.4rem;
+	}
+	.search-shortcut span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.4rem;
+		padding: 0.05rem 0.3rem;
+		border-radius: 0.4rem;
+		border: 1px solid rgba(148, 163, 233, 0.8);
+		background: rgba(248, 250, 252, 0.95);
+		font-size: 0.7rem;
+		color: #4b5563;
+		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+	}
+	
+	:root[data-theme='dark'] .search-shortcut span {
+		background: rgba(38, 42, 79, 0.95);
+		border-color: rgba(148, 163, 233, 0.5);
+		color: var(--color-muted);
+	}
+	.links {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		gap: 0.4rem;
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow-x: auto;
+		overflow-y: hidden;
+		flex-wrap: nowrap;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none; /* Firefox */
+	}
+	.links::-webkit-scrollbar {
+		display: none; /* Chrome/Safari */
+	}
+	.links a {
+		color: var(--color-muted);
+		padding: 0.45rem 1.05rem;
+		border-radius: 10px;
+		border: 1px solid transparent;
+		font-size: 0.9rem;
+		white-space: nowrap;
+		width: auto;
+		justify-content: center;
+		line-height: 1;
+		flex: 0 0 auto;
+	}
+	.links a:hover {
+		color: var(--color-text);
+		background: rgba(93, 103, 232, 0.12);
+		border-color: rgba(93, 103, 232, 0.18);
+		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+	}
+	
+	.links a.active {
+		color: var(--color-primary);
+		background: rgba(93, 103, 232, 0.12);
+		border-color: rgba(93, 103, 232, 0.18);
+	}
+	
+	.links a.active .link-icon {
+		color: var(--color-primary);
+	}
+	
+	.links a.active .link-icon svg {
+		color: var(--color-primary);
+		stroke: var(--color-primary);
+	}
+	
+	:root[data-theme='dark'] .links a:hover {
+		background: rgba(93, 103, 232, 0.2);
+		border-color: rgba(93, 103, 232, 0.3);
+	}
+	
+	:root[data-theme='dark'] .links a.active {
+		background: rgba(93, 103, 232, 0.2);
+		border-color: rgba(93, 103, 232, 0.3);
+		color: var(--color-primary-light);
+	}
+	
+	:root[data-theme='dark'] .links a.active .link-icon {
+		color: var(--color-primary-light);
+	}
+	
+	:root[data-theme='dark'] .links a.active .link-icon svg {
+		color: var(--color-primary-light);
+		stroke: var(--color-primary-light);
+	}
+	.actions {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 0.3rem;
+		flex: 0 0 auto;
+		white-space: nowrap;
+	}
+	.icon-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border-radius: 999px;
+		border: 1px solid rgba(148, 163, 233, 0.6);
+		background: rgba(248, 250, 252, 0.95);
+		color: var(--color-text);
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+	}
+	
+	:root[data-theme='dark'] .icon-button {
+		background: rgba(38, 42, 79, 0.95);
+		border-color: rgba(148, 163, 233, 0.4);
+	}
+	
+	.icon-button:hover {
+		background: rgba(93, 103, 232, 0.08);
+		border-color: rgba(93, 103, 232, 0.75);
+		transform: translateY(-1px);
+	}
+	
+	:root[data-theme='dark'] .icon-button:hover {
+		background: rgba(93, 103, 232, 0.15);
+		border-color: rgba(93, 103, 232, 0.6);
+	}
+	.lang-label {
+		font-weight: 600;
+	}
+	.theme-icon {
+		font-size: 1rem;
+	}
+	@media (max-width: 900px) {
+		nav {
+			grid-template-columns: 1fr;
+			grid-template-rows: repeat(5, auto);
+			justify-items: stretch;
+			gap: 0.8rem;
+		}
+		.brand {
+			justify-content: space-between;
+		}
+		.search {
+			justify-content: flex-start;
+		}
+		.actions {
+			justify-content: flex-start;
+		}
+	}
+	@media (max-width: 1200px) {
+		nav {
+			gap: 1rem 1.1rem;
+			grid-template-columns: auto minmax(140px, 200px) minmax(0, 1fr) auto auto;
+		}
+	}
+	@media (max-width: 640px) {
+		nav {
+			max-width: calc(100% - 1.5rem);
+		}
+		.links {
+			justify-content: flex-start;
+			flex-wrap: wrap;
+		}
+		.actions {
+			flex-wrap: wrap;
+		}
+	}
+</style>
+<script is:inline>
+	(function () {
+		if (typeof window === 'undefined') return;
+
+		const root = document.documentElement;
+		const themeBtn = document.querySelector('[data-toggle-theme]');
+		const langBtn = document.querySelector('[data-toggle-lang]');
+
+		const applyTheme = (theme) => {
+			if (!root) return;
+			root.setAttribute('data-theme', theme);
+			localStorage.setItem('theme', theme);
+			if (themeBtn) {
+				themeBtn.querySelector('.theme-icon')?.replaceChildren(theme === 'dark' ? '🌙' : '☀');
+			}
+		};
+
+		const applyLang = (lang) => {
+			document.documentElement.setAttribute('data-lang', lang);
+			localStorage.setItem('lang', lang);
+			if (langBtn) {
+				const label = langBtn.querySelector('.lang-label');
+				if (label) label.textContent = lang === 'en' ? 'EN' : '简';
+			}
+		};
+
+		document.addEventListener('DOMContentLoaded', () => {
+			// 初始化主题
+			const storedTheme = localStorage.getItem('theme');
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			applyTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
+
+			// 初始化语言
+			const storedLang = localStorage.getItem('lang') || 'zh';
+			applyLang(storedLang);
+
+			themeBtn?.addEventListener('click', () => {
+				const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+				applyTheme(next);
+			});
+
+			langBtn?.addEventListener('click', () => {
+				const current = document.documentElement.getAttribute('data-lang') || 'zh';
+				const next = current === 'zh' ? 'en' : 'zh';
+				applyLang(next);
+			});
+		});
+	})();
+</script>
+
+<script is:inline define:vars={{ algolia }}>
+	(function () {
+		if (typeof window === 'undefined') return;
+		
+		function loadOnce(tagName, attrs) {
+			return new Promise((resolve, reject) => {
+				const exists = Array.from(document.getElementsByTagName(tagName)).some((n) => {
+					if (tagName === 'link') return n.getAttribute('href') === attrs.href;
+					if (tagName === 'script') return n.getAttribute('src') === attrs.src;
+					return false;
+				});
+				if (exists) return resolve();
+
+				const el = document.createElement(tagName);
+				Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+				el.addEventListener('load', () => resolve(), { once: true });
+				el.addEventListener('error', () => reject(new Error(`Failed to load ${tagName}`)), { once: true });
+				document.head.appendChild(el);
+			});
+		}
+
+		async function ensureDocSearchAssets() {
+			// CSS 不阻塞渲染：动态注入即可
+			await loadOnce('link', {
+				rel: 'stylesheet',
+				href: 'https://cdn.jsdelivr.net/npm/@docsearch/css@3',
+			});
+			await loadOnce('script', {
+				src: 'https://cdn.jsdelivr.net/npm/@docsearch/js@3',
+				defer: '',
+			});
+		}
+
+		async function initDocSearch() {
+			const container = document.getElementById('docsearch');
+			if (!container) return;
+
+			// 缺配置就不初始化，避免无意义的网络请求
+			const indexName = (algolia.indices && algolia.indices[0]) || '';
+			if (!algolia.appId || !algolia.apiKey || !indexName) return;
+
+			try {
+				await ensureDocSearchAssets();
+				if (typeof docsearch !== 'function') return;
+
+				docsearch({
+					appId: algolia.appId,
+					apiKey: algolia.apiKey,
+					indexName,
+					container: '#docsearch',
+					translations: algolia.translations || {},
+					transformItems: (items) => {
+						return items
+							.filter((item) => item && item.url) // 确保有 url
+							.map((item) => {
+								// 确保 hierarchy 对象存在且完整
+								if (!item.hierarchy) {
+									item.hierarchy = {};
+								}
+								// 确保 lvl0 存在（必需）
+								if (!item.hierarchy.lvl0) {
+									item.hierarchy.lvl0 = item.title || item.content || '文档';
+								}
+								// 确保其他层级字段存在
+								for (let i = 1; i <= 6; i++) {
+									if (item.hierarchy[`lvl${i}`] === undefined) {
+										item.hierarchy[`lvl${i}`] = null;
+									}
+								}
+								// 确保有 content 字段用于显示
+								if (!item.content) {
+									item.content = item.title || '';
+								}
+								return item;
+							});
+					},
+				});
+			} catch (error) {
+				console.error('DocSearch init error:', error);
+			}
+		}
+		
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', () => {
+				// 默认在空闲时初始化；用户先点搜索框也会触发
+				const searchWrap = document.querySelector('.search');
+				let started = false;
+				const start = () => {
+					if (started) return;
+					started = true;
+					initDocSearch();
+				};
+
+				searchWrap?.addEventListener('click', start, { once: true });
+				searchWrap?.addEventListener('pointerenter', start, { once: true });
+				(window.requestIdleCallback ? window.requestIdleCallback(start) : setTimeout(start, 800));
+			});
+		} else {
+			// 同步渲染后：仍然按 idle 初始化
+			(window.requestIdleCallback ? window.requestIdleCallback(initDocSearch) : setTimeout(initDocSearch, 800));
+		}
+	})();
+</script>

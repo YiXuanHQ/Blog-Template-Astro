@@ -1,0 +1,597 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const learningPaths = [
+	{
+		id: 'java-backend',
+		title: 'Java 后端开发',
+		subtitle: 'Java开发完整技术栈',
+		icon: '☕',
+		badge: { text: '热门', color: '#ff6b9d' },
+		href: '/tutorials/java-backend/', // 自定义链接，指向新的 Java 后端教程页面
+		modules: [
+			{ name: 'Java编程基础', icon: '💜' },
+			{ name: 'Maven构建工具', icon: '🧡' },
+			{ name: 'MyBatis / MyBatis-Plus', icon: '🔵' },
+			{ name: 'Spring / Spring MVC', icon: '🌿' },
+			{ name: 'Spring Boot', icon: '⚡' },
+			{ name: 'Spring Cloud微服务', icon: '☁️' },
+		],
+	},
+	{
+		id: 'python-ai',
+		title: 'Python 人工智能',
+		subtitle: 'Python与AI技术学习路径',
+		icon: '🤖',
+		badge: { text: '前沿', color: '#7c85ff' },
+		href: '/tutorials/python-ai/',
+		modules: [
+			{ name: 'Python基础', icon: '🐍' },
+			{ name: '数据分析', icon: '📊' },
+			{ name: '机器学习', icon: '⚙️' },
+			{ name: '深度学习', icon: '🧠' },
+		],
+	},
+	{
+		id: 'llm-dev',
+		title: '大模型开发',
+		subtitle: '大模型开发学习路径',
+		icon: '🚀',
+		badge: { text: '火爆', color: '#ff4757' },
+		href: '/tutorials/llm-dev/',
+		modules: [
+			{ name: '大模型理论基础', icon: '🧠' },
+			{ name: 'Prompt Engineering', icon: '💬' },
+			{ name: 'Spring AI 框架', icon: '🌿' },
+			{ name: 'RAG 应用开发', icon: '🔍' },
+			{ name: 'Agent 智能体', icon: '🤖' },
+			{ name: '企业级实践', icon: '🏢' },
+		],
+	},
+	{
+		id: 'devops-engineer',
+		title: 'DevOps 运维工程',
+		subtitle: '容器化与自动化运维技术',
+		icon: '⚙️',
+		badge: { text: '实用', color: '#4ecdc4' },
+		href: '/tutorials/devops-engineer/',
+		modules: [
+			{ name: 'Linux基础', icon: '🐧' },
+			{ name: 'Docker容器化', icon: '🐳' },
+			{ name: 'Kubernetes', icon: '☸️' },
+			{ name: 'CI/CD流水线', icon: '🔄' },
+			{ name: '监控与日志', icon: '📈' },
+		],
+	},
+	{
+		id: 'frontend-dev',
+		title: '前端开发工程',
+		subtitle: '用户界面开发与交互体验设计',
+		icon: '💻',
+		badge: { text: '热门', color: '#5d67e8' },
+		href: '/tutorials/frontend-dev/',
+		modules: [
+			{ name: 'HTML/CSS/JavaScript', icon: '📝' },
+			{ name: 'Vue.js / React', icon: '⚛️' },
+			{ name: 'TypeScript', icon: '📘' },
+			{ name: 'Node.js后端', icon: '🟢' },
+			{ name: '构建工具与工程化', icon: '🛠️' },
+		],
+	},
+	{
+		id: 'harmonyos-dev',
+		title: 'HarmonyOS 开发工程',
+		subtitle: '华为鸿蒙生态应用开发',
+		icon: '📱',
+		badge: { text: '新兴', color: '#ffa502' },
+		href: '/tutorials/harmonyos-dev/',
+		modules: [
+			{ name: 'ArkTS语言基础', icon: '📱' },
+			{ name: 'ArkUI组件', icon: '🎨' },
+			{ name: '状态管理', icon: '🔄' },
+			{ name: '网络与数据', icon: '🌐' },
+			{ name: '设备能力调用', icon: '📡' },
+		],
+	},
+	{
+		id: 'big-data',
+		title: '大数据开发工程',
+		subtitle: '大数据处理与分布式计算',
+		icon: '📊',
+		badge: { text: '专业', color: '#a55eea' },
+		href: '/tutorials/big-data/',
+		modules: [
+			{ name: 'Hadoop生态', icon: '🐘' },
+			{ name: 'Spark计算框架', icon: '⚡' },
+			{ name: 'Flink流处理', icon: '🌊' },
+			{ name: '数据仓库', icon: '🏗️' },
+		],
+	},
+	{
+		id: 'algorithm-engineer',
+		title: '算法工程',
+		subtitle: '算法竞赛与大厂面试必备',
+		icon: '🧮',
+		badge: { text: '基础', color: '#26de81' },
+		href: '/tutorials/algorithm-engineer/',
+		modules: [
+			{ name: '数据结构', icon: '📚' },
+			{ name: '算法设计', icon: '🎯' },
+			{ name: 'LeetCode刷题', icon: '💡' },
+			{ name: '算法优化', icon: '⚡' },
+		],
+	},
+	{
+		id: 'computer-basics',
+		title: '计算机基础',
+		subtitle: '夯实计算机基础，理解底层原理',
+		icon: '💾',
+		badge: { text: '基础', color: '#778ca3' },
+		href: '/tutorials/computer-basics/',
+		modules: [
+			{ name: '操作系统', icon: '🖥️' },
+			{ name: '计算机网络', icon: '🌐' },
+			{ name: '数据结构与算法', icon: '📊' },
+			{ name: '编译原理', icon: '⚙️' },
+		],
+	},
+	{
+		id: 'cybersecurity',
+		title: '网络安全教程',
+		subtitle: 'Web安全与攻防基础能力构建',
+		icon: '🛡️',
+		badge: { text: '必学', color: '#2ed573' },
+		href: '/tutorials/cybersecurity/',
+		modules: [
+			{ name: '安全基础与伦理', icon: '📜' },
+			{ name: 'Web安全基础', icon: '🕸️' },
+			{ name: '常见漏洞与修复', icon: '🧩' },
+			{ name: '渗透测试流程', icon: '🧰' },
+			{ name: '安全工具入门', icon: '🔧' },
+		],
+	},
+	{
+		id: 'database',
+		title: '数据库技术',
+		subtitle: '掌握数据存储与管理核心技术',
+		icon: '🗄️',
+		badge: { text: '实用', color: '#45aaf2' },
+		href: '/tutorials/database/',
+		modules: [
+			{ name: 'MySQL数据库', icon: '🗃️' },
+			{ name: 'Redis缓存', icon: '🔴' },
+		],
+	},
+	{
+		id: 'development-tools',
+		title: '开发工具',
+		subtitle: '工欲善其事，必先利其器',
+		icon: '🛠️',
+		badge: { text: '效率', color: '#feca57' },
+		href: '/tutorials/development-tools/',
+		modules: [
+			{ name: 'Git版本控制', icon: '📦' },
+			{ name: 'IDE使用技巧', icon: '💻' },
+			{ name: '调试与测试', icon: '🐛' },
+			{ name: '性能优化工具', icon: '⚡' },
+		],
+	},
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`教程中心 - ${SITE_TITLE}`} description="系统化学习路径，从入门到精通。涵盖Java后端、Python AI、大模型、DevOps、前端、Harmony、大数据、算法、计算机基础、数据库、开发工具等模块。" />
+		<style>
+			main {
+				width: var(--max-width);
+				max-width: calc(100% - 2.5rem);
+			}
+			.page-header {
+				margin-bottom: 2.5rem;
+			}
+			.page-header h1 {
+				margin-bottom: 0.4rem;
+				font-size: clamp(1.8rem, 3vw, 2.2rem);
+			}
+			.page-meta {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				color: var(--color-muted);
+				font-size: 0.95rem;
+			}
+			.paths-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+				gap: 24px;
+				margin-top: 2rem;
+			}
+			
+			/* Magic Card 样式 - 与首页保持一致 */
+			.path-card {
+				position: relative;
+				background: rgba(255, 255, 255, 0.8);
+				backdrop-filter: blur(10px);
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				border-radius: 16px;
+				padding: 24px 20px 22px;
+				cursor: pointer;
+				overflow: hidden;
+				transition: all 0.3s ease;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+				display: flex !important;
+				flex-direction: column !important;
+				min-height: 380px !important;
+				text-decoration: none;
+				color: inherit;
+			}
+
+			.path-card::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border-radius: 16px;
+				padding: 1px;
+				background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+				-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+				-webkit-mask-composite: xor;
+				mask-composite: exclude;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+
+			.path-card:hover::before {
+				opacity: 1;
+			}
+
+			/* Magic Card 背景光效 */
+			.path-card__bg {
+				position: absolute;
+				inset: 0;
+				border-radius: 16px;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+				background: radial-gradient(
+					600px circle at var(--x, 50%) var(--y, 50%),
+					rgba(102, 126, 234, 0.15),
+					transparent 40%
+				);
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			.path-card:hover .path-card__bg {
+				opacity: 0;
+			}
+
+			.card-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 16px;
+				position: relative;
+				z-index: 2;
+				min-height: auto;
+			}
+			
+			.card-icon {
+				font-size: 42px;
+				transition: transform 0.3s ease;
+				line-height: 1;
+			}
+
+			.path-card:hover .card-icon {
+				transform: scale(1.1) rotate(-5deg);
+			}
+
+			.card-badge {
+				padding: 4px 12px;
+				border-radius: 12px;
+				font-size: 0.75em;
+				font-weight: 600;
+				color: white;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+			}
+
+			.card-content {
+				position: relative;
+				z-index: 2;
+				display: flex;
+				flex-direction: column;
+				flex: 1;
+			}
+
+			.card-title {
+				margin: 0 0 10px 0;
+				font-size: 1.35em;
+				font-weight: 600;
+				color: var(--text-color, #2c3e50);
+				transition: all 0.3s ease;
+				position: relative;
+				z-index: 3;
+				border: none !important;
+				padding: 0 !important;
+				line-height: 1.3;
+				min-height: auto;
+			}
+
+			.path-card:hover .card-title {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				transform: translateX(4px);
+			}
+
+			.card-subtitle {
+				color: var(--text-color-secondary, #6a737d);
+				font-size: 0.95em;
+				line-height: 1.6;
+				margin: 0 0 12px 0;
+				position: relative;
+				z-index: 2;
+				min-height: auto;
+			}
+
+			.modules-section {
+				margin: 16px 0 20px 0;
+				position: relative;
+				z-index: 2;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.modules-label {
+				font-size: 0.85em;
+				font-weight: 600;
+				color: var(--text-color, #2c3e50);
+				margin-bottom: 12px;
+				display: flex;
+				align-items: center;
+				opacity: 0.9;
+				flex-shrink: 0;
+			}
+
+			.modules-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: grid;
+				gap: 8px;
+			}
+
+			.module-item {
+				font-size: 0.85em;
+				color: var(--text-color-secondary, #6a737d);
+				padding: 6px 12px;
+				background: rgba(102, 126, 234, 0.05);
+				border-radius: 8px;
+				border-left: 3px solid rgba(102, 126, 234, 0.3);
+				transition: all 0.3s ease;
+				position: relative;
+				overflow: hidden;
+				display: block;
+			}
+
+			.module-item::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				width: 3px;
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				transform: scaleY(0);
+				transition: transform 0.3s ease;
+			}
+
+			.path-card:hover .module-item {
+				background: rgba(102, 126, 234, 0.08);
+				transform: translateX(4px);
+				border-left-color: rgba(102, 126, 234, 0.5);
+			}
+
+			.path-card:hover .module-item::before {
+				transform: scaleY(1);
+			}
+
+			.card-action {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: auto;
+				padding-top: 12px;
+				border-top: 1px solid rgba(0, 0, 0, 0.06);
+				position: relative;
+				z-index: 2;
+				flex-shrink: 0;
+			}
+
+			.start-btn {
+				color: #667eea;
+				font-weight: 600;
+				font-size: 0.9em;
+				transition: all 0.3s ease;
+				text-decoration: none;
+				display: inline-block;
+			}
+
+			.path-card:hover .start-btn {
+				transform: translateX(4px);
+			}
+
+			/* 悬停效果 */
+			.path-card:hover {
+				transform: translateY(-8px);
+				box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+			}
+			
+			/* 暗黑模式适配 */
+			[data-theme="dark"] .path-card {
+				background: rgb(28, 28, 30) !important;
+				backdrop-filter: none;
+				border-color: rgba(255, 255, 255, 0.2);
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+			}
+
+			[data-theme="dark"] .path-card:hover {
+				background: rgb(38, 38, 40) !important;
+				box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+			}
+
+			[data-theme="dark"] .path-card .card-title {
+				color: rgba(255, 255, 255, 0.9);
+			}
+
+			[data-theme="dark"] .card-subtitle {
+				color: rgba(255, 255, 255, 0.6);
+			}
+
+			[data-theme="dark"] .card-action {
+				border-top-color: rgba(255, 255, 255, 0.1);
+			}
+
+			[data-theme="dark"] .start-btn {
+				color: #8b9eff;
+			}
+
+			[data-theme="dark"] .modules-label {
+				color: rgba(255, 255, 255, 0.9);
+			}
+
+			[data-theme="dark"] .module-item {
+				background: rgba(102, 126, 234, 0.15);
+				border-left-color: rgba(102, 126, 234, 0.5);
+				color: rgba(255, 255, 255, 0.7);
+			}
+
+			[data-theme="dark"] .path-card:hover .module-item {
+				background: rgba(102, 126, 234, 0.25);
+				border-left-color: rgba(102, 126, 234, 0.7);
+			}
+			.intro-section {
+				margin-bottom: 2rem;
+				padding: 1.4rem;
+				background: rgba(93, 103, 232, 0.06);
+				border: 1px solid rgba(93, 103, 232, 0.12);
+				border-radius: var(--radius-card);
+			}
+			.intro-section h2 {
+				margin-bottom: 0.5rem;
+				font-size: 1.5rem;
+			}
+			.intro-section p {
+				margin: 0;
+				color: var(--color-muted);
+			}
+			@media (max-width: 768px) {
+				main {
+					max-width: calc(100% - 1.5rem);
+				}
+				.paths-grid {
+					grid-template-columns: 1fr;
+					gap: 1.2rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="page-header">
+				<h1>教程中心</h1>
+				<div class="page-meta">
+					<span>你的名字</span>
+					<span>·</span>
+					<span>系统化学习路径</span>
+				</div>
+			</section>
+
+			<section class="intro-section">
+				<h2>系统化学习路径，从入门到精通</h2>
+				<p>精选12个核心技术方向，每个路径都包含完整的学习模块和实践项目，帮助你从零基础到专业水平。</p>
+			</section>
+
+			<section class="paths-grid">
+				{
+					learningPaths.map((path) => (
+						<a href={path.href || `/tutorials/${path.id}/`} class="path-card">
+							<span class="path-card__bg"></span>
+							<div class="card-header">
+								<div class="card-icon">{path.icon}</div>
+								<span
+									class="card-badge"
+									style={`background: ${path.badge.color};`}
+								>
+									{path.badge.text}
+								</span>
+							</div>
+							<div class="card-content">
+								<h3 class="card-title">{path.title}</h3>
+								<p class="card-subtitle">{path.subtitle}</p>
+								<div class="modules-section">
+									<div class="modules-label">📑 包含模块：</div>
+									<div class="modules-list">
+										{
+											path.modules.map((module) => (
+												<div class="module-item">
+													{module.icon} {module.name}
+												</div>
+											))
+										}
+									</div>
+								</div>
+							</div>
+							<div class="card-action">
+								<span class="start-btn">开始学习 →</span>
+							</div>
+						</a>
+					))
+				}
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
+<script is:inline>
+	(function () {
+		if (typeof window === 'undefined') return;
+
+		document.addEventListener('DOMContentLoaded', () => {
+			// Magic Card 初始化
+			const initMagicCards = () => {
+				const magicCards = document.querySelectorAll('.path-card');
+
+				magicCards.forEach(card => {
+					const bg = card.querySelector('.path-card__bg');
+
+					// 鼠标移动跟踪光效
+					card.addEventListener('mousemove', (e) => {
+						const rect = card.getBoundingClientRect();
+						const x = ((e.clientX - rect.left) / rect.width) * 100;
+						const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+						if (bg) {
+							bg.style.setProperty('--x', `${x}%`);
+							bg.style.setProperty('--y', `${y}%`);
+						}
+					});
+
+				});
+			};
+
+			setTimeout(initMagicCards, 100);
+		});
+	})();
+</script>
+
+
+
+
+

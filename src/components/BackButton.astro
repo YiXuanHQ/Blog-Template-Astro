@@ -1,0 +1,185 @@
+---
+const { fallbackHref = '/tutorials/', label = '返回', parentPath } = Astro.props;
+---
+
+<button 
+	type="button" 
+	class="back-button" 
+	data-back-button 
+	data-fallback-href={fallbackHref}
+	data-parent-path={parentPath || ''}
+	aria-label={label}
+>
+	<span class="back-arrow" aria-hidden="true">←</span>
+	<span class="back-label">{label}</span>
+</button>
+
+<style>
+	.back-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.45rem 0.85rem;
+		border-radius: 999px;
+		border: 1px solid rgba(148, 163, 184, 0.5);
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--color-text);
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.back-button:hover {
+		background: rgba(93, 103, 232, 0.08);
+		border-color: rgba(93, 103, 232, 0.5);
+		box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+	}
+
+	.back-arrow {
+		font-size: 1rem;
+		line-height: 1;
+	}
+
+	:root[data-theme='dark'] .back-button {
+		background: rgba(38, 42, 79, 0.9);
+		border-color: rgba(148, 163, 233, 0.35);
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	:root[data-theme='dark'] .back-button:hover {
+		background: rgba(93, 103, 232, 0.2);
+		border-color: rgba(93, 103, 232, 0.6);
+		box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+	}
+</style>
+
+<script is:inline>
+	(function () {
+		const btn = document.querySelector('[data-back-button]');
+		if (!btn) return;
+		const fallbackHref = btn.getAttribute('data-fallback-href') || '/tutorials/';
+		const parentPath = btn.getAttribute('data-parent-path');
+
+		/**
+		 * 计算返回路径（改进版）
+		 * 优先级：
+		 * 1. 使用传入的父级路径（parentPath）
+		 * 2. 使用浏览器历史记录（如果来源是本站）
+		 * 3. 使用路径解析逻辑
+		 * 4. 使用 fallbackHref
+		 */
+		function calculateBackPath(currentPath, parentPath) {
+			// 优先使用传入的父级路径
+			if (parentPath) {
+				return parentPath.endsWith('/') ? parentPath : parentPath + '/';
+			}
+
+			// 尝试使用浏览器历史记录（如果可用且来源是本站）
+			if (window.history.length > 1) {
+				const referrer = document.referrer;
+				if (referrer && new URL(referrer).origin === window.location.origin) {
+					const referrerPath = new URL(referrer).pathname;
+					// 检查 referrer 是否是有效的教程路径
+					if (referrerPath.startsWith('/tutorials/') || referrerPath.startsWith('/articles/') || referrerPath.startsWith('/notes/')) {
+						return referrerPath.endsWith('/') ? referrerPath : referrerPath + '/';
+					}
+				}
+			}
+
+			// 使用路径解析逻辑
+			const originalPath = currentPath.replace(/\/$/, '');
+			const normalizedPath = originalPath.toLowerCase();
+			
+			// 处理博客文章路径（/articles/xxx）
+			if (normalizedPath.startsWith('/articles')) {
+				if (normalizedPath === '/articles') {
+					return null;
+				}
+				if (normalizedPath.startsWith('/articles/')) {
+					return '/articles/';
+				}
+				return null;
+			}
+			
+			// 处理笔记路径（/notes/xxx）
+			if (normalizedPath.startsWith('/notes')) {
+				if (normalizedPath === '/notes') {
+					return null;
+				}
+				if (normalizedPath.startsWith('/notes/')) {
+					return '/notes/';
+				}
+				return null;
+			}
+			
+			// 处理教程路径（/tutorials/...）
+			if (normalizedPath.startsWith('/tutorials')) {
+				if (normalizedPath === '/tutorials') {
+					return null;
+				}
+				
+				const pathWithoutPrefix = originalPath.replace(/^\/tutorials\/?/i, '');
+				const normalizedPathWithoutPrefix = normalizedPath.replace(/^\/tutorials\/?/, '');
+				
+				if (!normalizedPathWithoutPrefix) {
+					return '/tutorials/';
+				}
+				
+				const segments = pathWithoutPrefix.split('/').filter(Boolean);
+				const normalizedSegments = normalizedPathWithoutPrefix.split('/').filter(Boolean);
+				
+				// 情况1: 如果是教程目录页（只有一个路径段）
+				if (normalizedSegments.length === 1) {
+					return '/tutorials/';
+				}
+				
+				// 情况2: 如果是 readme 页面
+				if (normalizedSegments.length > 1 && normalizedSegments[normalizedSegments.length - 1] === 'readme') {
+					const parentPath = segments.slice(0, -1).join('/');
+					return parentPath ? `/tutorials/${parentPath}/` : '/tutorials/';
+				}
+				
+				// 情况3: 如果是教程详情页或子目录页
+				if (normalizedSegments.length > 1) {
+					const parentPath = segments.slice(0, -1).join('/');
+					return parentPath ? `/tutorials/${parentPath}/` : '/tutorials/';
+				}
+				
+				return '/tutorials/';
+			}
+			
+			return null;
+		}
+
+		btn.addEventListener('click', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			try {
+				const currentPath = window.location.pathname;
+				const backPath = calculateBackPath(currentPath, parentPath);
+				
+				if (backPath) {
+					window.location.href = backPath;
+					return;
+				}
+				
+				// 尝试使用浏览器返回
+				if (window.history.length > 1) {
+					const referrer = document.referrer;
+					if (referrer && new URL(referrer).origin === window.location.origin) {
+						window.history.back();
+						return;
+					}
+				}
+			} catch (e) {
+				console.error('计算返回路径时出错:', e);
+			}
+			
+			// 最终回退
+			const normalizedFallback = fallbackHref.endsWith('/') ? fallbackHref : fallbackHref + '/';
+			window.location.href = normalizedFallback;
+		});
+	})();
+</script>

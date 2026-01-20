@@ -1,0 +1,1228 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`关于 - ${SITE_TITLE}`} description="你好！我是一名热爱编程的技术爱好者。这个博客是我的个人技术笔记本和生活记录本。" />
+		<style>
+			main {
+				width: var(--max-width);
+				max-width: calc(100% - 2.5rem);
+			}
+			.about-hero {
+				position: relative;
+				margin: 2rem 0;
+				border-radius: 28px;
+				padding: 2.6rem 2.6rem;
+				background: linear-gradient(135deg, rgba(102, 126, 234, 0.18) 0%, rgba(118, 75, 162, 0.16) 55%, rgba(245, 190, 240, 0.14) 100%);
+				border: 1px solid rgba(0, 0, 0, 0.06);
+				overflow: hidden;
+				box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+			}
+			.about-hero::before {
+				content: '';
+				position: absolute;
+				inset: -40% -30% auto auto;
+				width: 520px;
+				height: 520px;
+				background: radial-gradient(circle, rgba(102, 126, 234, 0.22), transparent 60%);
+				filter: blur(10px);
+				pointer-events: none;
+			}
+			.about-hero::after {
+				content: '';
+				position: absolute;
+				inset: auto auto -40% -30%;
+				width: 560px;
+				height: 560px;
+				background: radial-gradient(circle, rgba(245, 190, 240, 0.22), transparent 60%);
+				filter: blur(12px);
+				pointer-events: none;
+			}
+			.about-hero-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.35rem 0.75rem;
+				border-radius: 999px;
+				background: rgba(20, 20, 20, 0.65);
+				color: rgba(255, 255, 255, 0.92);
+				font-size: 0.82rem;
+				font-weight: 600;
+				letter-spacing: 0.2px;
+				backdrop-filter: blur(10px);
+				position: relative;
+				z-index: 2;
+			}
+			.about-hero-grid {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) 320px;
+				align-items: center;
+				gap: 2.4rem;
+				margin-top: 1.8rem;
+				position: relative;
+				z-index: 2;
+			}
+			.about-hero-left {
+				min-width: 0;
+			}
+			.about-hero-title {
+				margin: 0;
+				border: none;
+				font-size: 2rem;
+				font-weight: 800;
+				letter-spacing: 0.3px;
+				color: var(--color-text);
+			}
+			.about-hero-desc {
+				margin: 0.9rem 0 0;
+				color: var(--color-muted);
+				font-size: 1.02rem;
+				line-height: 1.7;
+			}
+			.about-hero-hashtag {
+				margin-top: 0.9rem;
+				font-size: 0.92rem;
+				color: var(--color-muted);
+			}
+			.about-hero-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+				margin-top: 1.5rem;
+			}
+			.about-pill {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.6rem 0.9rem;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.72);
+				border: 1px solid rgba(0, 0, 0, 0.08);
+				box-shadow: 0 10px 18px rgba(0, 0, 0, 0.06);
+				backdrop-filter: blur(10px);
+				font-size: 0.92rem;
+				color: var(--color-text);
+				line-height: 1;
+			}
+			.about-pill strong {
+				font-weight: 800;
+			}
+			.about-hero-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.9rem;
+				margin-top: 1.6rem;
+			}
+			.about-btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				padding: 0.85rem 1.3rem;
+				border-radius: 999px;
+				border: 1px solid rgba(0, 0, 0, 0.08);
+				background: rgba(255, 255, 255, 0.75);
+				color: var(--color-text);
+				font-weight: 700;
+				text-decoration: none;
+				cursor: pointer;
+				transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+			}
+			.about-btn.primary {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+				border-color: transparent;
+				box-shadow: 0 14px 26px rgba(102, 126, 234, 0.28);
+			}
+			.about-btn:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
+			}
+			.about-btn:active {
+				transform: translateY(-1px);
+			}
+			.about-hero-right {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1rem;
+			}
+			.avatar-ring-wrap {
+				position: relative;
+				width: 140px;
+				height: 140px;
+				border-radius: 50%;
+				padding: 5px;
+				background: conic-gradient(from 180deg, #f093fb, #667eea, #4facfe, #43e97b, #f093fb);
+				box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+			}
+			.avatar-ring-wrap img {
+				width: 100%;
+				height: 100%;
+				border-radius: 50%;
+				object-fit: cover;
+				display: block;
+				border: 4px solid rgba(255, 255, 255, 0.9);
+			}
+			.status-pill {
+				margin-top: -0.6rem;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.55rem;
+				padding: 0.55rem 0.9rem;
+				border-radius: 999px;
+				background: rgba(25, 25, 25, 0.7);
+				color: rgba(255, 255, 255, 0.92);
+				backdrop-filter: blur(10px);
+				box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+				font-size: 0.88rem;
+			}
+			.status-dot {
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background: #34d399;
+				box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
+			}
+			.hobby-chips {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.65rem;
+				justify-content: center;
+				margin-top: 0.4rem;
+			}
+			.hobby-chip {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.55rem 0.85rem;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.72);
+				border: 1px solid rgba(0, 0, 0, 0.08);
+				box-shadow: 0 10px 18px rgba(0, 0, 0, 0.06);
+				backdrop-filter: blur(10px);
+				font-size: 0.9rem;
+				color: var(--color-text);
+				line-height: 1;
+			}
+			#contact {
+				scroll-margin-top: 90px;
+			}
+			.content-section {
+				margin: 2.2rem 0;
+				padding: 1.8rem 1.9rem;
+				border-radius: 22px;
+				border: 1px solid rgba(0, 0, 0, 0.06);
+				background: rgba(255, 255, 255, 0.65);
+				box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06);
+				backdrop-filter: blur(10px);
+				transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+			}
+			.content-section:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 18px 46px rgba(0, 0, 0, 0.09);
+				border-color: rgba(93, 103, 232, 0.22);
+			}
+			.content-section h2 {
+				font-size: 1.55rem;
+				margin: 0 0 1rem;
+				letter-spacing: 0.2px;
+			}
+			.content-section p {
+				color: var(--color-muted);
+				line-height: 1.75;
+				margin: 0.85rem 0;
+			}
+			.content-section ul {
+				margin: 0.9rem 0 0;
+				padding-left: 1.2rem;
+			}
+			.content-section ul li {
+				margin-bottom: 0.55rem;
+			}
+			.section-kicker {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.35rem 0.75rem;
+				border-radius: 999px;
+				background: rgba(102, 126, 234, 0.12);
+				border: 1px solid rgba(102, 126, 234, 0.18);
+				color: rgba(40, 46, 110, 0.92);
+				font-weight: 800;
+				font-size: 0.85rem;
+				letter-spacing: 0.2px;
+				margin-bottom: 0.9rem;
+			}
+			.findme {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) 360px;
+				align-items: center;
+				gap: 1.6rem;
+				position: relative;
+				overflow: hidden;
+				background: linear-gradient(135deg, rgba(240, 147, 251, 0.16) 0%, rgba(102, 126, 234, 0.14) 50%, rgba(79, 172, 254, 0.12) 100%);
+				border-color: rgba(102, 126, 234, 0.12);
+			}
+			.content-section.findme {
+				padding: 1.4rem 1.6rem;
+			}
+			.findme::before {
+				content: '';
+				position: absolute;
+				inset: -40% -30% auto auto;
+				width: 520px;
+				height: 520px;
+				background: radial-gradient(circle, rgba(240, 147, 251, 0.22), transparent 60%);
+				filter: blur(12px);
+				pointer-events: none;
+			}
+			.findme > * {
+				position: relative;
+				z-index: 1;
+			}
+			.findme-title {
+				margin: 0.2rem 0 0.5rem;
+				font-size: 1.55rem;
+				font-weight: 900;
+				letter-spacing: 0.2px;
+			}
+			.findme-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.7rem;
+				margin-top: 1rem;
+			}
+			.findme-chip {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.55rem 0.85rem;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.72);
+				border: 1px solid rgba(0, 0, 0, 0.06);
+				font-weight: 700;
+				color: var(--color-text);
+				box-shadow: 0 10px 18px rgba(0, 0, 0, 0.06);
+				backdrop-filter: blur(10px);
+				text-decoration: none;
+				transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+			}
+			.findme-chip:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 14px 26px rgba(0, 0, 0, 0.1);
+			}
+			.xiaohongshu-image {
+				max-width: 450px;
+				width: 100%;
+				border-radius: 16px;
+				margin: 0.6rem auto 0;
+				display: block;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+				transition: transform 0.3s ease, box-shadow 0.3s ease;
+			}
+			.findme .xiaohongshu-image {
+				max-width: 320px;
+				margin-top: 0.35rem;
+			}
+			.xiaohongshu-image:hover {
+				transform: translateY(-4px);
+				box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+			}
+			.xiaohongshu-wrapper {
+				text-align: center;
+				margin: 0.4rem 0 0;
+			}
+			.findme .xiaohongshu-wrapper {
+				margin-top: 0;
+			}
+			.contact-card img {
+				max-width: 180px;
+				width: 100%;
+				border-radius: 12px;
+				margin-top: 0.5rem;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			.content-section h3 {
+				font-size: 1.3rem;
+				margin-top: 2rem;
+				margin-bottom: 0.8rem;
+			}
+			.skill-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.6rem;
+				margin: 1.2rem 0;
+			}
+			.skill-tag {
+				display: inline-block;
+				background: var(--color-surface-subtle);
+				border: 1px solid var(--color-border);
+				padding: 0.5rem 1rem;
+				border-radius: var(--radius-pill);
+				font-size: 0.9em;
+				transition: all 0.3s ease;
+			}
+			.skill-tag:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(93, 103, 232, 0.2);
+				border-color: var(--color-primary);
+			}
+			.philosophy-box {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1.2rem;
+				margin: 2rem 0;
+			}
+			.philosophy-item {
+				background: var(--color-surface);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-card);
+				padding: 1.5rem;
+				text-align: center;
+				transition: all 0.3s ease;
+			}
+			.philosophy-item:hover {
+				transform: translateY(-5px);
+				box-shadow: var(--shadow-soft);
+				border-color: var(--color-primary);
+			}
+			.philosophy-item h3 {
+				margin-top: 0;
+				margin-bottom: 0.8rem;
+				border: none;
+				font-size: 1.1rem;
+			}
+			.philosophy-item p {
+				margin: 0;
+				color: var(--color-muted);
+			}
+			.goals-list {
+				background: var(--color-surface-subtle);
+				border-radius: var(--radius-card);
+				padding: 1.8rem;
+				margin: 2rem 0;
+				border: 1px solid var(--color-border);
+			}
+			.goal-item {
+				font-size: 1rem;
+				padding: 0.8rem 0;
+				border-bottom: 1px solid var(--color-border);
+				display: flex;
+				align-items: center;
+				gap: 0.6rem;
+			}
+			.goal-item:last-child {
+				border-bottom: none;
+			}
+			.goal-item input[type='checkbox'] {
+				width: 18px;
+				height: 18px;
+				cursor: not-allowed;
+			}
+			.contact-cards {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1.2rem;
+				margin: 2rem 0;
+			}
+			.contact-card {
+				background: var(--color-surface);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-card);
+				padding: 1.8rem;
+				text-align: center;
+				transition: all 0.3s ease;
+			}
+			.contact-card:hover {
+				transform: translateY(-5px);
+				box-shadow: var(--shadow-soft);
+				border-color: var(--color-primary);
+			}
+			.contact-icon {
+				font-size: 3rem;
+				margin-bottom: 1rem;
+			}
+			.contact-card h3 {
+				margin: 0.8rem 0;
+				border: none;
+				font-size: 1.1rem;
+			}
+			.contact-card a {
+				color: var(--color-primary);
+				text-decoration: none;
+				font-weight: 600;
+			}
+			.contact-card a:hover {
+				text-decoration: underline;
+			}
+			.contact-card img {
+				max-width: 100%;
+				border-radius: 16px;
+				margin-top: 0.5rem;
+			}
+			.motto-box {
+				background: var(--color-surface-subtle);
+				border-left: 4px solid var(--color-primary);
+				padding: 1.5rem 1.8rem;
+				margin: 1.5rem 0;
+				border-radius: 8px;
+			}
+			.motto-box blockquote {
+				font-style: italic;
+				font-size: 1rem;
+				line-height: 1.6;
+				margin: 0;
+				border: none;
+				color: var(--color-text);
+			}
+			.motto-author {
+				text-align: right;
+				margin-top: 0.8rem;
+				color: var(--color-muted);
+				font-weight: 600;
+				font-size: 0.9em;
+			}
+			.final-section {
+				text-align: center;
+				margin-top: 3rem;
+				padding: 2rem;
+			}
+			.final-section h3 {
+				margin-top: 0;
+			}
+			.final-section p {
+				color: var(--color-muted);
+				margin: 1.2rem 0;
+			}
+			.contact-button {
+				display: inline-block;
+				padding: 0.8rem 2rem;
+				background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+				color: white !important;
+				border-radius: 25px;
+				text-decoration: none;
+				font-weight: 700;
+				transition: all 0.3s ease;
+				margin-top: 1.5rem;
+				box-shadow: 0 4px 16px rgba(93, 103, 232, 0.3);
+			}
+			.contact-button:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(93, 103, 232, 0.4);
+			}
+			ul {
+				line-height: 1.8;
+			}
+			ul li {
+				margin-bottom: 0.5rem;
+			}
+			@media (max-width: 768px) {
+				main {
+					max-width: calc(100% - 1.5rem);
+				}
+				.about-hero {
+					padding: 2rem 1.4rem;
+				}
+				.about-hero-grid {
+					grid-template-columns: 1fr;
+					gap: 1.8rem;
+				}
+				.about-hero-title {
+					font-size: 1.65rem;
+				}
+				.avatar-ring-wrap {
+					width: 124px;
+					height: 124px;
+				}
+				.about-hero-actions {
+					gap: 0.75rem;
+				}
+				.philosophy-box,
+				.contact-cards {
+					grid-template-columns: 1fr;
+				}
+				.xiaohongshu-image {
+					max-width: 100%;
+					margin: 1.5rem auto;
+				}
+				.contact-card img {
+					max-width: 150px;
+				}
+				.content-section {
+					padding: 1.4rem 1.2rem;
+					border-radius: 18px;
+				}
+				.findme {
+					grid-template-columns: 1fr;
+				}
+			}
+			.music-player-section {
+				margin-top: 1.5rem;
+			}
+			.music-player-container {
+				position: relative;
+				max-width: 500px;
+				margin: 0 auto;
+			}
+			.music-player-main {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				padding: 1rem 1.2rem;
+				border-radius: 16px;
+				border: 1px solid rgba(148, 163, 233, 0.6);
+				background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(238, 242, 255, 0.9));
+				box-shadow: 0 10px 28px rgba(93, 103, 232, 0.12);
+				cursor: pointer;
+				transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+			}
+			.music-player-main:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 12px 30px rgba(93, 103, 232, 0.2);
+			}
+			.music-player-main.is-playing {
+				border-color: rgba(93, 103, 232, 0.8);
+				box-shadow: 0 12px 30px rgba(93, 103, 232, 0.2);
+			}
+			.music-controls-panel {
+				margin-top: 1rem;
+				padding: 1rem 1.2rem;
+				border-radius: 16px;
+				border: 1px solid rgba(148, 163, 233, 0.45);
+				background: var(--color-surface);
+				box-shadow: 0 18px 44px rgba(15, 23, 42, 0.22);
+				display: grid;
+				gap: 0.75rem;
+			}
+			.music-progress-row {
+				display: grid;
+				grid-template-columns: 1fr auto;
+				align-items: center;
+				gap: 0.75rem;
+			}
+			.music-progress-bar {
+				position: relative;
+				height: 8px;
+				border-radius: 999px;
+				background: rgba(148, 163, 233, 0.28);
+				overflow: hidden;
+				cursor: pointer;
+			}
+			.music-progress-fill {
+				position: absolute;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				width: 0%;
+				border-radius: inherit;
+				background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+				transition: width 0.12s linear;
+			}
+			.music-time {
+				font-size: 0.8rem;
+				color: var(--color-muted);
+				white-space: nowrap;
+			}
+			.music-controls-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.75rem;
+			}
+			.music-control-btn {
+				flex: 1;
+				border-radius: 999px;
+				border: 1px solid rgba(148, 163, 233, 0.6);
+				background: linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(232, 238, 255, 0.96));
+				color: var(--color-text);
+				font-size: 0.9rem;
+				padding: 0.6rem 0.8rem;
+				cursor: pointer;
+				transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, color 0.18s ease;
+			}
+			.music-control-btn.icon {
+				flex: 0 0 auto;
+				width: 40px;
+				height: 40px;
+				padding: 0;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 999px;
+				font-size: 1rem;
+				line-height: 1;
+				user-select: none;
+			}
+			.music-control-btn.icon.primary {
+				width: 72px;
+				height: 40px;
+				border-color: rgba(93, 103, 232, 0.75);
+				background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(236, 72, 153, 0.14));
+			}
+			.music-control-btn:hover {
+				transform: translateY(-1px);
+				border-color: rgba(93, 103, 232, 0.9);
+				background: rgba(93, 103, 232, 0.12);
+				color: var(--color-primary);
+			}
+			.music-visual {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+			}
+			.music-visual .bar {
+				display: inline-block;
+				width: 4px;
+				border-radius: 999px;
+				background: linear-gradient(180deg, rgba(99, 102, 241, 0.95), rgba(147, 197, 253, 0.85));
+				height: 12px;
+				transform-origin: bottom center;
+				animation: none;
+			}
+			.music-player-main.is-playing .bar {
+				animation: bounce 0.9s ease-in-out infinite;
+			}
+			.music-player-main.is-playing .bar-1 { animation-delay: 0.05s; }
+			.music-player-main.is-playing .bar-2 { animation-delay: 0.15s; }
+			.music-player-main.is-playing .bar-3 { animation-delay: 0.25s; }
+			.music-player-main.is-playing .bar-4 { animation-delay: 0.35s; }
+			@keyframes bounce {
+				0%, 100% { height: 12px; }
+				50% { height: 24px; }
+			}
+			.music-info {
+				display: flex;
+				flex-direction: column;
+				line-height: 1.2;
+				flex: 1;
+				min-width: 0;
+			}
+			.music-title {
+				font-weight: 700;
+				color: var(--color-text);
+				font-size: 1rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.music-status {
+				color: var(--color-muted);
+				font-size: 0.85rem;
+				margin-top: 0.2rem;
+			}
+			:root[data-theme='dark'] .about-hero {
+				border-color: rgba(255, 255, 255, 0.08);
+				box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+			}
+			:root[data-theme='dark'] .about-pill,
+			:root[data-theme='dark'] .hobby-chip {
+				background: rgba(20, 20, 20, 0.35);
+				border-color: rgba(255, 255, 255, 0.12);
+				box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+			}
+			:root[data-theme='dark'] .about-btn {
+				border-color: rgba(255, 255, 255, 0.12);
+				background: rgba(20, 20, 20, 0.28);
+			}
+			:root[data-theme='dark'] .about-btn.primary {
+				box-shadow: 0 14px 28px rgba(102, 126, 234, 0.35);
+			}
+			:root[data-theme='dark'] .content-section {
+				background: rgba(20, 20, 20, 0.35);
+				border-color: rgba(255, 255, 255, 0.1);
+				box-shadow: 0 16px 44px rgba(0, 0, 0, 0.35);
+			}
+			:root[data-theme='dark'] .content-section:hover {
+				border-color: rgba(102, 126, 234, 0.28);
+				box-shadow: 0 20px 54px rgba(0, 0, 0, 0.45);
+			}
+			:root[data-theme='dark'] .section-kicker {
+				background: rgba(102, 126, 234, 0.18);
+				border-color: rgba(102, 126, 234, 0.22);
+				color: rgba(235, 238, 255, 0.92);
+			}
+			:root[data-theme='dark'] .findme-chip {
+				background: rgba(20, 20, 20, 0.35);
+				border-color: rgba(255, 255, 255, 0.12);
+				box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+			}
+			:root[data-theme='dark'] .music-player-main {
+				background: linear-gradient(135deg, rgba(38, 42, 79, 0.95), rgba(25, 27, 54, 0.92));
+				border-color: rgba(148, 163, 233, 0.4);
+				box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+			}
+			:root[data-theme='dark'] .music-control-btn {
+				background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(12, 16, 32, 0.95));
+				border-color: rgba(148, 163, 233, 0.5);
+			}
+			:root[data-theme='dark'] .music-control-btn:hover {
+				background: rgba(93, 103, 232, 0.2);
+				border-color: rgba(93, 103, 232, 0.7);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="about-hero">
+				<span class="about-hero-badge">About me in 10s ⚡</span>
+				<div class="about-hero-grid">
+					<div class="about-hero-left">
+						<h1 class="about-hero-title">您的名字 · 10 秒认识我</h1>
+						<p class="about-hero-desc" id="aboutSignature">在这里填写您的个性签名。</p>
+						<div class="about-hero-hashtag"># 您的标签</div>
+						<div class="about-hero-tags">
+							<span class="about-pill">定位 <strong>填写您的定位</strong></span>
+							<span class="about-pill">当前主线 <strong>填写您的主线方向</strong></span>
+						</div>
+						<div class="about-hero-actions">
+							<button type="button" class="about-btn primary" id="signatureBtn">换一句签名</button>
+							<a class="about-btn" href="#contact">了解更多 →</a>
+						</div>
+					</div>
+					<div class="about-hero-right">
+						<div class="avatar-ring-wrap">
+							<img src="/avatar.png" alt="头像" loading="lazy" />
+						</div>
+						<div class="status-pill">
+							<span class="status-dot"></span>
+							<span>填写您的当前状态</span>
+						</div>
+						<div class="hobby-chips">
+							<span class="hobby-chip">💻 Coding</span>
+							<span class="hobby-chip">📚 Reading</span>
+							<span class="hobby-chip">🎵 Music</span>
+						</div>
+						<div class="music-player-section">
+							<div class="music-player-container" data-music-wrapper>
+								<div class="music-player-main" data-music-player>
+									<div class="music-visual">
+										<span class="bar bar-1"></span>
+										<span class="bar bar-2"></span>
+										<span class="bar bar-3"></span>
+										<span class="bar bar-4"></span>
+									</div>
+									<div class="music-info">
+										<div class="music-title" data-music-title title="恋人">恋人</div>
+										<div class="music-status" data-music-status>点击播放</div>
+									</div>
+								</div>
+								<div class="music-controls-panel" data-music-popup>
+									<div class="music-progress-row">
+										<div class="music-progress-bar" data-music-seek>
+											<div class="music-progress-fill" data-music-progress></div>
+										</div>
+										<div class="music-time" data-music-time>00:00 / 00:00</div>
+									</div>
+									<div class="music-controls-row">
+										<button class="music-control-btn icon" type="button" data-music-prev aria-label="上一首">⏮</button>
+										<button class="music-control-btn icon primary" type="button" data-music-toggle aria-label="播放/暂停">▶️</button>
+										<button class="music-control-btn icon" type="button" data-music-next aria-label="下一首">⏭</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="content-section">
+				<h2>💫 个人简介</h2>
+				<p>你好！我是一名热爱编程的技术爱好者。</p>
+				<p>
+					我相信技术能够改变世界，代码可以创造价值。在这个快速变化的时代，我始终保持学习的热情，不断探索新技术、新领域。
+				</p>
+				<p>这个博客是我的个人技术笔记本和生活记录本，在这里我会：</p>
+				<ul>
+					<li>📝 分享技术学习心得和项目经验</li>
+					<li>💡 记录问题解决方案和最佳实践</li>
+					<li>🎯 总结职业发展的思考和规划</li>
+					<li>✍️ 记录生活点滴和个人感悟</li>
+				</ul>
+			</section>
+
+			<section class="content-section findme">
+				<div>
+					<div class="section-kicker">📱 Find me</div>
+					<h2 class="findme-title">找到我</h2>
+					<p>欢迎通过以下方式关注我，获取更多学习资源和技术分享。</p>
+					<div class="findme-actions">
+						<a class="findme-chip" href="#contact">📫 联系方式</a>
+						<a class="findme-chip" href="https://github.com/YiXuanHQ" target="_blank">🐙 GitHub</a>
+					</div>
+				</div>
+				<div class="xiaohongshu-wrapper">
+					<img src="/xiaohongshu.jpg" alt="二维码" class="xiaohongshu-image" loading="lazy" />
+				</div>
+			</section>
+
+			<section class="content-section">
+				<h2>🛠️ 技术栈</h2>
+
+				<h3>后端开发</h3>
+				<div class="skill-tags">
+					<span class="skill-tag">☕ Java</span>
+					<span class="skill-tag">🍃 Spring Boot</span>
+					<span class="skill-tag">🐍 Python</span>
+					<span class="skill-tag">🟢 Node.js</span>
+				</div>
+
+				<h3>前端开发</h3>
+				<div class="skill-tags">
+					<span class="skill-tag">📜 JavaScript</span>
+					<span class="skill-tag">⚛️ React</span>
+					<span class="skill-tag">💚 Vue.js</span>
+					<span class="skill-tag">🎨 CSS3</span>
+				</div>
+
+				<h3>数据库</h3>
+				<div class="skill-tags">
+					<span class="skill-tag">🐬 MySQL</span>
+					<span class="skill-tag">🐘 PostgreSQL</span>
+					<span class="skill-tag">🍃 MongoDB</span>
+					<span class="skill-tag">🔴 Redis</span>
+				</div>
+
+				<h3>工具 & 其他</h3>
+				<div class="skill-tags">
+					<span class="skill-tag">🐙 Git</span>
+					<span class="skill-tag">🐳 Docker</span>
+					<span class="skill-tag">☸️ Kubernetes</span>
+					<span class="skill-tag">🔧 Linux</span>
+				</div>
+			</section>
+
+			<section class="content-section">
+				<h2>📚 学习理念</h2>
+				<div class="philosophy-box">
+					<div class="philosophy-item">
+						<h3>🎯 目标导向</h3>
+						<p>明确学习目标，有的放矢</p>
+					</div>
+					<div class="philosophy-item">
+						<h3>💪 刻意练习</h3>
+						<p>通过大量练习巩固知识</p>
+					</div>
+					<div class="philosophy-item">
+						<h3>📝 输出驱动</h3>
+						<p>通过写作和分享深化理解</p>
+					</div>
+					<div class="philosophy-item">
+						<h3>🔄 持续迭代</h3>
+						<p>不断反思和改进学习方法</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="content-section">
+				<h2>🎯 2025 年目标</h2>
+				<div class="goals-list">
+					<div class="goal-item">
+						<input type="checkbox" disabled />
+						<span>完成 50 篇技术博客</span>
+					</div>
+					<div class="goal-item">
+						<input type="checkbox" disabled />
+						<span>开源 3 个有价值的项目</span>
+					</div>
+					<div class="goal-item">
+						<input type="checkbox" disabled />
+						<span>阅读 20 本技术书籍</span>
+					</div>
+					<div class="goal-item">
+						<input type="checkbox" disabled />
+						<span>参与 2 个开源社区项目</span>
+					</div>
+					<div class="goal-item">
+						<input type="checkbox" disabled />
+						<span>深入学习云原生技术</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="content-section">
+				<h2>💼 项目经历</h2>
+
+				<h3>🌐 个人博客系统</h3>
+				<p>基于 VuePress 的个人技术博客，集成多语言支持、全局搜索、暗黑模式等功能。</p>
+				<p><strong>技术栈</strong>: VuePress, Vue.js, Markdown, GitHub Pages</p>
+
+				<h3>📝 在线笔记应用</h3>
+				<p>一个支持多人协作的在线笔记应用，支持 Markdown 编辑、实时同步等功能。</p>
+				<p><strong>技术栈</strong>: React, Node.js, MongoDB, WebSocket</p>
+			</section>
+
+			<section class="content-section">
+				<h2>📫 联系方式</h2>
+				<div id="contact"></div>
+				<div class="contact-cards">
+					<div class="contact-card">
+						<div class="contact-icon">📧</div>
+						<h3>Email</h3>
+						<a href="mailto:your-email@example.com">your-email@example.com</a>
+					</div>
+					<div class="contact-card">
+						<div class="contact-icon">🐙</div>
+						<h3>GitHub</h3>
+						<a href="https://github.com/YiXuanHQ" target="_blank" rel="noreferrer">@YiXuanHQ</a>
+					</div>
+					<div class="contact-card">
+						<div class="contact-icon">💬</div>
+						<h3>Blog</h3>
+						<a href="/">我的博客</a>
+					</div>
+					<div class="contact-card">
+						<div class="contact-icon">📝</div>
+						<h3>其他平台</h3>
+						<a href="https://your-platform.com" target="_blank" rel="noreferrer">平台主页</a>
+					</div>
+				</div>
+			</section>
+
+			<section class="content-section">
+				<h2>🌈 兴趣爱好</h2>
+				<p>除了编程，我还喜欢：</p>
+				<ul>
+					<li>📚 <strong>阅读</strong> - 技术书籍、科幻小说、人文社科</li>
+					<li>✍️ <strong>写作</strong> - 记录思考，分享知识</li>
+					<li>🎵 <strong>音乐</strong> - 欣赏各种风格的音乐</li>
+					<li>🎮 <strong>游戏</strong> - 偶尔放松的方式</li>
+					<li>🏃 <strong>运动</strong> - 保持健康的身体</li>
+				</ul>
+			</section>
+
+			<section class="content-section">
+				<h2>💭 座右铭</h2>
+				<div class="motto-box">
+					<blockquote>
+						"Stay Hungry, Stay Foolish"<br />
+						"保持饥饿，保持愚蠢"
+					</blockquote>
+					<p class="motto-author">—— Steve Jobs</p>
+				</div>
+				<div class="motto-box">
+					<blockquote>
+						"The only way to do great work is to love what you do."<br />
+						"成就伟大的唯一途径就是热爱你所做的事。"
+					</blockquote>
+					<p class="motto-author">—— Steve Jobs</p>
+				</div>
+			</section>
+
+			<div class="final-section">
+				<h3>🤝 期待与你交流</h3>
+				<p>
+					如果你对技术、学习或生活有任何想法，<br />
+					欢迎通过邮件或 GitHub 与我交流！
+				</p>
+				<a href="mailto:your-email@example.com" class="contact-button">📧 联系我</a>
+			</div>
+		</main>
+		<Footer />
+		<script is:inline>
+			(function () {
+				if (typeof window === 'undefined') return;
+				document.addEventListener('DOMContentLoaded', () => {
+					const btn = document.getElementById('signatureBtn');
+					const el = document.getElementById('aboutSignature');
+					if (!btn || !el) return;
+					const signatures = [
+						'在这里填写您的个性签名。',
+						'保持好奇，持续学习。',
+						'用代码改变世界。',
+						'不断探索，永不止步。',
+						'热爱技术，享受生活。'
+					];
+					let lastIndex = -1;
+					const pick = () => {
+						if (signatures.length === 0) return;
+						let idx = Math.floor(Math.random() * signatures.length);
+						if (signatures.length > 1) {
+							while (idx === lastIndex) idx = Math.floor(Math.random() * signatures.length);
+						}
+						lastIndex = idx;
+						el.textContent = signatures[idx];
+					};
+					btn.addEventListener('click', pick);
+				});
+			})();
+		</script>
+		<script is:inline>
+			(function () {
+				if (typeof window === 'undefined') return;
+
+				const musicContainer = document.querySelector('[data-music-player]');
+				const musicTitle = document.querySelector('[data-music-title]');
+				const musicStatus = document.querySelector('[data-music-status]');
+				const progressFill = document.querySelector('[data-music-progress]');
+				const progressTime = document.querySelector('[data-music-time]');
+				const progressBar = document.querySelector('[data-music-seek]');
+				const prevBtn = document.querySelector('[data-music-prev]');
+				const toggleBtn = document.querySelector('[data-music-toggle]');
+				const nextBtn = document.querySelector('[data-music-next]');
+
+				const playlist = [
+					{ src: '/music/lianren.mp3', title: '恋人' },
+					{ src: '/music/queyue.mp3', title: '雀跃' },
+					{ src: '/music/wohuainiande.mp3', title: '我怀念的' },
+				];
+				let currentIndex = 0;
+				let audio;
+				let isPlaying = false;
+
+				const formatTime = (seconds) => {
+					if (!Number.isFinite(seconds)) return '00:00';
+					const m = Math.floor(seconds / 60);
+					const s = Math.floor(seconds % 60);
+					return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+				};
+
+				const updateTrackInfo = () => {
+					const track = playlist[currentIndex];
+					if (musicTitle && track) {
+						musicTitle.textContent = track.title;
+						musicTitle.title = track.title;
+					}
+				};
+
+				const loadTrack = (index, autoplay = false) => {
+					if (!audio || !playlist.length) return;
+					currentIndex = ((index % playlist.length) + playlist.length) % playlist.length;
+					const track = playlist[currentIndex];
+					audio.src = track.src;
+					audio.load();
+					updateTrackInfo();
+					if (autoplay) {
+						audio
+							.play()
+							.catch(() => {
+								// autoplay 失败时保持 UI 为未播放
+							});
+					}
+				};
+
+				document.addEventListener('DOMContentLoaded', () => {
+					if (musicContainer) {
+						audio = new Audio();
+						audio.preload = 'metadata';
+						updateTrackInfo();
+						loadTrack(currentIndex, false);
+
+						const updateMusicUI = (playing) => {
+							isPlaying = playing;
+							if (musicStatus) musicStatus.textContent = playing ? '播放中' : '已暂停';
+							if (musicContainer) musicContainer.classList.toggle('is-playing', playing);
+							if (toggleBtn) toggleBtn.textContent = playing ? '⏸' : '▶️';
+						};
+
+						const updateProgress = () => {
+							if (!audio) return;
+							const { currentTime, duration } = audio;
+							const percent = duration ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+							if (progressFill) progressFill.style.width = `${percent}%`;
+							if (progressTime) progressTime.textContent = `${formatTime(currentTime)} / ${formatTime(duration || 0)}`;
+						};
+
+						// 点击播放器主区域：播放/暂停
+						musicContainer.addEventListener('click', () => {
+							if (!audio) return;
+							if (audio.paused) {
+								audio
+									.play()
+									.then(() => {
+										updateMusicUI(true);
+									})
+									.catch(() => {
+										// 某些浏览器/场景可能阻止播放（策略/解码/资源等）
+										updateMusicUI(false);
+										if (musicStatus) musicStatus.textContent = '播放失败（请再点一次）';
+									});
+							} else {
+								audio.pause();
+								updateMusicUI(false);
+							}
+						});
+
+						// 上一首按钮
+						if (prevBtn) {
+							prevBtn.addEventListener('click', (event) => {
+								event.stopPropagation();
+								loadTrack(currentIndex - 1, isPlaying);
+							});
+						}
+
+						// 下一首按钮
+						if (nextBtn) {
+							nextBtn.addEventListener('click', (event) => {
+								event.stopPropagation();
+								loadTrack(currentIndex + 1, isPlaying);
+							});
+						}
+
+						// 播放/暂停按钮
+						if (toggleBtn) {
+							toggleBtn.addEventListener('click', (event) => {
+								event.stopPropagation();
+								if (!audio) return;
+								if (audio.paused) {
+									audio
+										.play()
+										.then(() => {
+											updateMusicUI(true);
+										})
+										.catch(() => {
+											updateMusicUI(false);
+											if (musicStatus) musicStatus.textContent = '播放失败（请再点一次）';
+										});
+								} else {
+									audio.pause();
+									updateMusicUI(false);
+								}
+							});
+						}
+
+						// 进度条点击
+						if (progressBar) {
+							progressBar.addEventListener('click', (event) => {
+								event.stopPropagation();
+								if (!audio || !audio.duration) return;
+								const rect = progressBar.getBoundingClientRect();
+								const ratio = (event.clientX - rect.left) / rect.width;
+								const clamped = Math.min(1, Math.max(0, ratio));
+								audio.currentTime = clamped * audio.duration;
+								updateProgress();
+							});
+						}
+
+						audio.addEventListener('play', () => {
+							updateMusicUI(true);
+						});
+						audio.addEventListener('pause', () => {
+							updateMusicUI(false);
+						});
+						audio.addEventListener('ended', () => {
+							updateMusicUI(false);
+							// 自动切下一首
+							loadTrack(currentIndex + 1, true);
+						});
+						audio.addEventListener('timeupdate', updateProgress);
+						audio.addEventListener('loadedmetadata', updateProgress);
+						audio.addEventListener('error', () => {
+							if (musicStatus) musicStatus.textContent = '加载失败';
+							if (progressTime) progressTime.textContent = '00:00 / 00:00';
+						});
+					}
+				});
+			})();
+		</script>
+	</body>
+</html>

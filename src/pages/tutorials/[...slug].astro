@@ -1,0 +1,304 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+import { getTutorialNavigation } from '../../utils/tutorialNavigation';
+import { generateTutorialBreadcrumb } from '../../utils/breadcrumb';
+
+export async function getStaticPaths() {
+	// 获取所有教程文件，过滤掉草稿
+	const allPosts = await getCollection('tutorials', ({ data }) => {
+		return data.draft !== true;
+	});
+	
+	const paths: Array<{ params: { slug: string }; props: CollectionEntry<'tutorials'> }> = [];
+	const readmeMap = new Map<string, CollectionEntry<'tutorials'>>();
+	const dirFirstFileMap = new Map<string, CollectionEntry<'tutorials'>>();
+	
+	// 第一步：处理所有文件，并识别 README 文件
+	for (const post of allPosts) {
+		const fileId = post.id;
+		const lastSlashIndex = fileId.lastIndexOf('/');
+		
+		// 为每个文件创建原始路径（不带斜杠）
+		paths.push({
+			params: { slug: fileId },
+			props: post,
+		});
+		
+		// 同时创建带尾部斜杠的路径，确保两种格式都能匹配
+		// 因为中间件会将不带斜杠的路径重定向到带斜杠的版本
+		paths.push({
+			params: { slug: `${fileId}/` },
+			props: post,
+		});
+		
+		// 处理大小写不匹配问题：
+		// 1. 如果文件 ID 包含大写字母（如 MySQL、InnoDB），生成小写变体
+		// 2. 如果文件 ID 是小写的但包含关键词（如 mysql、innodb），生成大写变体
+		if (lastSlashIndex >= 0) {
+			const fileName = fileId.substring(lastSlashIndex + 1);
+			const dirPath = fileId.substring(0, lastSlashIndex);
+			
+			// 检查文件名是否包含常见的技术关键词（不区分大小写）
+			const hasTechKeyword = /(mysql|innodb|sql|api|url|html|css|js|json|xml)/i.test(fileName);
+			
+			if (hasTechKeyword) {
+				// 情况1：文件 ID 包含大写字母，生成小写变体
+				if (/[A-Z]/.test(fileName)) {
+					const lowerFileName = fileName.toLowerCase();
+					if (lowerFileName !== fileName) {
+						const lowerFileId = dirPath ? `${dirPath}/${lowerFileName}` : lowerFileName;
+						paths.push({
+							params: { slug: lowerFileId },
+							props: post,
+						});
+						paths.push({
+							params: { slug: `${lowerFileId}/` },
+							props: post,
+						});
+					}
+				}
+				
+				// 情况2：文件 ID 是小写的，生成常见的大写变体
+				// 这处理 Windows 文件系统将文件名转换为小写的情况
+				if (fileName === fileName.toLowerCase() && /[a-z]/.test(fileName)) {
+					// 生成常见的大写变体模式
+					const upperCaseVariants = [
+						// MySQL 相关
+						fileName.replace(/mysql管理/g, 'MySQL管理'),
+						fileName.replace(/mysql/g, 'MySQL'),
+						// InnoDB 相关
+						fileName.replace(/innodb引擎/g, 'InnoDB引擎'),
+						fileName.replace(/innodb/g, 'InnoDB'),
+						// SQL 相关
+						fileName.replace(/sql基础语法/g, 'SQL基础语法'),
+						fileName.replace(/sql性能优化/g, 'SQL性能优化'),
+						fileName.replace(/sql/g, 'SQL'),
+					].filter(variant => variant !== fileName && variant !== fileName.toLowerCase());
+					
+					// 去重并添加路径
+					const uniqueVariants = [...new Set(upperCaseVariants)];
+					for (const variant of uniqueVariants) {
+						const variantFileId = dirPath ? `${dirPath}/${variant}` : variant;
+						paths.push({
+							params: { slug: variantFileId },
+							props: post,
+						});
+						paths.push({
+							params: { slug: `${variantFileId}/` },
+							props: post,
+						});
+					}
+				}
+			}
+		}
+		
+		// 识别 README 文件并映射到目录（支持大小写不敏感）
+		// glob loader 可能生成小写的 readme 或大写的 README
+		const lowerFileId = fileId.toLowerCase();
+		if (lowerFileId.endsWith('/readme')) {
+			// 例如：java-backend/readme -> java-backend
+			const dirPath = fileId.substring(0, fileId.length - '/readme'.length);
+			if (dirPath && !readmeMap.has(dirPath)) {
+				readmeMap.set(dirPath, post);
+			}
+		} else if (lowerFileId === 'readme') {
+			// 根目录的 README
+			readmeMap.set('', post);
+		}
+		
+		// 为每个目录记录第一个文件（用于目录索引）
+		// 例如：java-backend/java/第01章-基础入门/01-开发环境与工具
+		// 会记录 java-backend/java/第01章-基础入门 -> 01-开发环境与工具
+		if (lastSlashIndex > 0) {
+			const dirPath = fileId.substring(0, lastSlashIndex);
+			// 如果该目录没有 README，且还没有记录第一个文件，则记录当前文件
+			if (!readmeMap.has(dirPath) && !dirFirstFileMap.has(dirPath)) {
+				dirFirstFileMap.set(dirPath, post);
+			}
+		}
+	}
+	
+	// 第二步：为每个有 README 的目录创建目录路径
+	// 这样 /tutorials/java-backend/ 可以访问到对应的 README
+	for (const [dirPath, readmePost] of readmeMap.entries()) {
+		if (dirPath) {
+			paths.push({
+				params: { slug: dirPath },
+				props: readmePost,
+			});
+			// 同时创建带尾部斜杠的路径
+			paths.push({
+				params: { slug: `${dirPath}/` },
+				props: readmePost,
+			});
+		}
+	}
+	
+	// 第三步：为没有 README 的目录创建路由，使用该目录下的第一个文件
+	// 这样访问 /tutorials/java-backend/java/第01章-基础入门/ 会显示第一个文件
+	// 注意：只处理没有 README 的目录
+	for (const [dirPath, firstFile] of dirFirstFileMap.entries()) {
+		// 如果该目录已经有 README，跳过（README 的优先级更高）
+		if (!readmeMap.has(dirPath)) {
+			paths.push({
+				params: { slug: dirPath },
+				props: firstFile,
+			});
+			paths.push({
+				params: { slug: `${dirPath}/` },
+				props: firstFile,
+			});
+		}
+	}
+	
+	return paths;
+}
+
+type Props = CollectionEntry<'tutorials'>;
+
+const post = Astro.props;
+const { Content } = await render(post);
+const allTutorials = await getCollection('tutorials', ({ data }) => !data.draft);
+const breadcrumbItems = await generateTutorialBreadcrumb(post, allTutorials);
+
+// 获取导航信息
+const navigation = await getTutorialNavigation(post);
+const prevChapter = navigation.prev;
+const nextChapter = navigation.next;
+---
+
+<BlogPost 
+	title={post.data.title}
+	description={post.data.description || ''}
+	pubDate={post.data.pubDate || post.data.date || new Date()}
+	updatedDate={post.data.updatedDate}
+	heroImage={post.data.heroImage}
+	tags={post.data.tags || []}
+	breadcrumbItems={breadcrumbItems}
+	backUrl={navigation.backPath}
+	parentPath={navigation.parent ? `/tutorials/${navigation.parent.id}/` : undefined}
+>
+	<div class="tutorial-layout">
+		<!-- 主内容区 -->
+		<div class="tutorial-content-wrapper">
+			<Content />
+			
+			<!-- 自动生成的章节导航 -->
+			{(prevChapter || nextChapter) && (
+				<nav class="tutorial-navigation" aria-label="章节导航">
+					{prevChapter && (
+						<a href={`/tutorials/${prevChapter.id}/`} class="nav-link nav-link--prev">
+							<span class="nav-label">← 上一章</span>
+							<span class="nav-title">{prevChapter.data.title}</span>
+						</a>
+					)}
+					{nextChapter && (
+						<a href={`/tutorials/${nextChapter.id}/`} class="nav-link nav-link--next">
+							<span class="nav-label">下一章 →</span>
+							<span class="nav-title">{nextChapter.data.title}</span>
+						</a>
+					)}
+				</nav>
+			)}
+		</div>
+	</div>
+</BlogPost>
+
+<style>
+	.tutorial-layout {
+		margin-top: 1.5rem;
+	}
+
+	.tutorial-content-wrapper {
+		min-width: 0; /* 防止内容溢出 */
+		max-width: 800px; /* 限制内容宽度，使其适合阅读 */
+		width: 100%;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
+	}
+	
+	/* 确保在移动设备上也能正常显示 */
+	@media (max-width: 1024px) {
+		.tutorial-content-wrapper {
+			max-width: 100%;
+		}
+	}
+
+	.tutorial-navigation {
+		display: flex;
+		gap: 1rem;
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 2px solid var(--color-border);
+		flex-wrap: wrap;
+	}
+
+	.nav-link {
+		flex: 1;
+		min-width: 200px;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 1.25rem;
+		border-radius: var(--radius-card);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		text-decoration: none;
+		color: var(--color-text);
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-soft);
+	}
+
+	.nav-link:hover {
+		background: linear-gradient(135deg, rgba(93, 103, 232, 0.08), rgba(93, 103, 232, 0.04));
+		border-color: rgba(93, 103, 232, 0.3);
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(93, 103, 232, 0.15);
+	}
+
+	.nav-link--prev {
+		text-align: left;
+	}
+
+	.nav-link--next {
+		text-align: right;
+	}
+
+	.nav-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		opacity: 0.8;
+	}
+
+	.nav-title {
+		font-size: 1rem;
+		font-weight: 500;
+		color: var(--color-text);
+		line-height: 1.5;
+	}
+
+	/* 响应式设计 */
+	@media (max-width: 1024px) {
+		.tutorial-layout {
+			/* 单列布局，无需特殊处理 */
+		}
+	}
+
+	@media (max-width: 768px) {
+		.tutorial-navigation {
+			flex-direction: column;
+			gap: 0.75rem;
+		}
+
+		.nav-link {
+			min-width: auto;
+		}
+
+		.nav-link--next {
+			text-align: left;
+		}
+	}
+</style>
+

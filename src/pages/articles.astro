@@ -1,0 +1,418 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blogs'))
+	.filter((post) => !post.data.draft)
+	.sort((a, b) => {
+		const dateA = a.data.pubDate || a.data.date || new Date(0);
+		const dateB = b.data.pubDate || b.data.date || new Date(0);
+		return dateB.valueOf() - dateA.valueOf();
+	});
+
+// 收集所有分类
+const allCategories = new Set<string>();
+posts.forEach((post) => {
+	if (post.data.categories && Array.isArray(post.data.categories)) {
+		post.data.categories.forEach((cat: string) => allCategories.add(cat));
+	}
+});
+const categoriesList = Array.from(allCategories).sort();
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`技术文章 - ${SITE_TITLE}`} description="你的名字的技术博客文章，涵盖前端、后端、AI、开发工具等各个技术领域。" />
+		<style>
+			main {
+				width: var(--max-width);
+				max-width: calc(100% - 2.5rem);
+			}
+			.page-header {
+				margin-bottom: 2rem;
+			}
+			.page-header h1 {
+				margin-bottom: 0.4rem;
+				font-size: clamp(1.8rem, 3vw, 2.2rem);
+			}
+			.page-description {
+				color: var(--color-muted);
+				margin: 0;
+			}
+			.categories-filter {
+				margin-bottom: 2rem;
+				padding: 1.25rem;
+				background: rgba(93, 103, 232, 0.04);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-card);
+			}
+			.categories-filter-label {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-bottom: 1rem;
+				font-size: 0.95rem;
+				font-weight: 600;
+				color: var(--color-text);
+			}
+			.categories-list {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+			}
+			.category-btn {
+				padding: 0.5rem 1rem;
+				border-radius: var(--radius-pill);
+				border: 1px solid var(--color-border);
+				background: var(--color-surface);
+				color: var(--color-text);
+				font-size: 0.875rem;
+				font-weight: 500;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				white-space: nowrap;
+			}
+			.category-btn:hover {
+				border-color: var(--color-primary);
+				color: var(--color-primary);
+				transform: translateY(-1px);
+			}
+			.category-btn.active {
+				background: var(--color-primary);
+				color: white;
+				border-color: var(--color-primary);
+				box-shadow: 0 4px 12px rgba(93, 103, 232, 0.3);
+			}
+			.category-btn.active:hover {
+				background: var(--color-primary-dark);
+				border-color: var(--color-primary-dark);
+			}
+			[data-theme="dark"] .categories-filter {
+				background: rgba(93, 103, 232, 0.08);
+				border-color: rgba(255, 255, 255, 0.1);
+			}
+			[data-theme="dark"] .category-btn {
+				background: rgba(255, 255, 255, 0.05);
+				border-color: rgba(255, 255, 255, 0.15);
+				color: var(--color-text);
+			}
+			[data-theme="dark"] .category-btn:hover {
+				border-color: var(--color-primary);
+				color: var(--color-primary);
+				background: rgba(93, 103, 232, 0.1);
+			}
+			.articles-list {
+				display: flex;
+				flex-direction: column;
+				gap: 1.25rem;
+			}
+			.article-card {
+				position: relative;
+				background: rgba(255, 255, 255, 0.8);
+				backdrop-filter: blur(10px);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-card);
+				padding: 1.75rem 2rem;
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+				overflow: hidden;
+				display: block;
+				text-decoration: none;
+				color: inherit;
+			}
+			.article-card::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border-radius: var(--radius-card);
+				padding: 1px;
+				background: linear-gradient(135deg, rgba(93, 103, 232, 0.2), rgba(118, 75, 162, 0.2));
+				-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+				-webkit-mask-composite: xor;
+				mask-composite: exclude;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+			.article-card:hover::before {
+				opacity: 1;
+			}
+			.article-card.hidden {
+				display: none;
+			}
+			.article-card:hover {
+				transform: translateY(-4px);
+				box-shadow: 0 12px 32px rgba(93, 103, 232, 0.15);
+				border-color: rgba(93, 103, 232, 0.3);
+			}
+			.article-title {
+				margin: 0 0 1rem 0;
+				font-size: 1.4rem;
+				line-height: 1.4;
+				font-weight: 600;
+				color: var(--color-text);
+				transition: color 0.2s ease;
+			}
+			.article-card:hover .article-title {
+				color: var(--color-primary);
+			}
+			.article-meta {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				gap: 1rem;
+				margin-top: 1rem;
+				padding-top: 1rem;
+				border-top: 1px solid var(--color-border);
+			}
+			.meta-left {
+				display: flex;
+				align-items: center;
+				gap: 1.25rem;
+				flex-wrap: wrap;
+			}
+			.meta-row {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				flex-wrap: wrap;
+				font-size: 0.9rem;
+				color: var(--color-muted);
+			}
+			.meta-item {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.875rem;
+				color: var(--color-muted);
+			}
+			.meta-icon {
+				font-size: 0.95rem;
+				line-height: 1;
+				opacity: 0.7;
+			}
+			.meta-label {
+				color: var(--color-muted);
+			}
+			.tags-list {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			.tag-item {
+				display: inline-flex;
+				align-items: center;
+				padding: 0.35rem 0.75rem;
+				border-radius: var(--radius-pill);
+				background: rgba(93, 103, 232, 0.08);
+				color: var(--color-primary-dark);
+				border: 1px solid rgba(93, 103, 232, 0.15);
+				font-size: 0.8rem;
+				font-weight: 500;
+				transition: all 0.2s ease;
+			}
+			.article-card:hover .tag-item {
+				background: rgba(93, 103, 232, 0.12);
+				border-color: rgba(93, 103, 232, 0.25);
+				transform: translateY(-1px);
+			}
+			.views-count {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.875rem;
+				color: var(--color-muted);
+			}
+			.views-icon {
+				font-size: 0.95rem;
+				opacity: 0.7;
+			}
+			/* 暗黑模式适配 */
+			[data-theme="dark"] .article-card {
+				background: rgba(28, 28, 30, 0.8);
+				border-color: rgba(255, 255, 255, 0.1);
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+			}
+			[data-theme="dark"] .article-card:hover {
+				background: rgba(38, 38, 40, 0.9);
+				box-shadow: 0 12px 32px rgba(93, 103, 232, 0.25);
+				border-color: rgba(93, 103, 232, 0.4);
+			}
+			[data-theme="dark"] .article-meta {
+				border-top-color: rgba(255, 255, 255, 0.1);
+			}
+			[data-theme="dark"] .tag-item {
+				background: rgba(93, 103, 232, 0.15);
+				border-color: rgba(93, 103, 232, 0.25);
+				color: var(--color-primary-light);
+			}
+			[data-theme="dark"] .article-card:hover .tag-item {
+				background: rgba(93, 103, 232, 0.2);
+				border-color: rgba(93, 103, 232, 0.35);
+			}
+			@media (max-width: 768px) {
+				main {
+					max-width: calc(100% - 1.5rem);
+				}
+				.categories-filter {
+					padding: 1rem;
+				}
+				.categories-filter-label {
+					font-size: 0.875rem;
+					margin-bottom: 0.875rem;
+				}
+				.categories-list {
+					gap: 0.5rem;
+				}
+				.category-btn {
+					padding: 0.4rem 0.8rem;
+					font-size: 0.8125rem;
+				}
+				.article-card {
+					padding: 1.4rem 1.5rem;
+				}
+				.article-title {
+					font-size: 1.2rem;
+					margin-bottom: 0.875rem;
+				}
+				.article-meta {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 0.875rem;
+					padding-top: 0.875rem;
+				}
+				.meta-left {
+					gap: 1rem;
+				}
+				.meta-item {
+					font-size: 0.8125rem;
+				}
+				.tag-item {
+					font-size: 0.75rem;
+					padding: 0.3rem 0.65rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+		<section class="page-header">
+			<h1>技术文章</h1>
+			<p class="page-description">记录技术学习与实践过程中的心得体会</p>
+		</section>
+
+		{
+			categoriesList.length > 0 && (
+				<section class="categories-filter">
+					<div class="categories-filter-label">
+						<span>📂</span>
+						<span>分类筛选：</span>
+					</div>
+					<div class="categories-list">
+						<button class="category-btn active" data-category="all">全部</button>
+						{
+							categoriesList.map((category) => (
+								<button class="category-btn" data-category={category}>{category}</button>
+							))
+						}
+					</div>
+				</section>
+			)
+		}
+		<section class="articles-list">
+				{
+					posts.map((post) => {
+						const categories = post.data.categories && Array.isArray(post.data.categories) 
+							? post.data.categories.join(',') 
+							: '';
+						const postPath = `/articles/${post.id}/`;
+						return (
+							<a href={postPath} class="article-card" data-categories={categories}>
+								<h2 class="article-title">
+									{post.data.title}
+								</h2>
+								<div class="article-meta">
+									<div class="meta-left">
+										<div class="meta-item">
+											<span class="meta-icon">👤</span>
+											<span class="meta-label">你的名字</span>
+										</div>
+										<div class="meta-item">
+											<span class="meta-icon">📅</span>
+											<span class="meta-label">
+												<FormattedDate date={post.data.pubDate || post.data.date || new Date()} />
+											</span>
+										</div>
+										{
+											post.data.tags && post.data.tags.length > 0 ? (
+												<div class="tags-list">
+													{
+														post.data.tags.map((tag) => (
+															<span class="tag-item">{tag}</span>
+														))
+													}
+												</div>
+											) : null
+										}
+									</div>
+								</div>
+							</a>
+						);
+					})
+				}
+			</section>
+		</main>
+		<Footer />
+		<script>
+			(function() {
+				const categoryButtons = document.querySelectorAll('.category-btn');
+				const articleCards = document.querySelectorAll('.article-card');
+				
+				categoryButtons.forEach(btn => {
+					btn.addEventListener('click', () => {
+						// 更新按钮状态
+						categoryButtons.forEach(b => b.classList.remove('active'));
+						btn.classList.add('active');
+						
+						const selectedCategory = btn.getAttribute('data-category');
+						
+						// 筛选文章
+						articleCards.forEach(card => {
+							if (selectedCategory === 'all') {
+								card.classList.remove('hidden');
+							} else {
+								const cardCategories = card.getAttribute('data-categories') || '';
+								if (cardCategories.includes(selectedCategory)) {
+									card.classList.remove('hidden');
+								} else {
+									card.classList.add('hidden');
+								}
+							}
+						});
+						
+						// 平滑滚动到顶部（可选）
+						if (selectedCategory !== 'all') {
+							document.querySelector('.articles-list')?.scrollIntoView({ 
+								behavior: 'smooth', 
+								block: 'start' 
+							});
+						}
+					});
+				});
+			})();
+		</script>
+	</body>
+</html>
+
+
+
+
+
+
