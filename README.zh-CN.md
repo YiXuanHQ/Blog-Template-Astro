@@ -16,6 +16,22 @@
 
 ---
 
+## 🖼️ 预览
+
+| 首页 | 教程中心 |
+| --- | --- |
+| ![首页](src/assets/首页.png) | ![教程中心](src/assets/教程中心.png) |
+
+| 技术文章 | 日常随笔 |
+| --- | --- |
+| ![技术文章](src/assets/技术文章.png) | ![日常随笔](src/assets/日常随笔.png) |
+
+| 留言板 | 关于 |
+| --- | --- |
+| ![留言板](src/assets/留言板.png) | ![关于](src/assets/关于.png) |
+
+---
+
 ## ✨ 特性一览
 
 <table>
@@ -245,7 +261,7 @@ tutorials/
 
 - 提交 [Issue](https://github.com/YiXuanHQ/Blog-Template-Astro/issues)
 - 参与 [Discussions](https://github.com/YiXuanHQ/Blog-Template-Astro/discussions)
-- 邮件：your-email@example.com
+- 邮件：byyi.xuan@outlook.com
 
 ---
 
